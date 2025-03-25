@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿team_abbrev,owner
+=======
+﻿triCode,owner
+>>>>>>> 0108c29 (refactor: refactor nhl api code)
 FLA,Rob
 DAL,Ani
 WPG,Madhav
@@ -18,7 +22,11 @@ MIN,Rob
 CGY,Rob
 STL,Ani
 BOS,Madhav
+<<<<<<< HEAD
 WSH,Eric
+=======
+WAS,Eric
+>>>>>>> 0108c29 (refactor: refactor nhl api code)
 MTL,Eric
 CHI,Madhav
 VAN,Ani

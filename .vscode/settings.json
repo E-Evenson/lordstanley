@@ -1,0 +1,6 @@
+{
+    "[csv]": {
+        "editor.inlayHints.maximumLength": 0
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:system"
+}

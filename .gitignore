@@ -16,7 +16,10 @@ __pycache__/
 *.pyo
 .mypy_cache/
 .pytest_cache/
+<<<<<<< HEAD
 *.pyc
+=======
+>>>>>>> 0108c29 (refactor: refactor nhl api code)
 
 # Environment
 .venv/
@@ -43,5 +46,9 @@ logs/
 # Distribution / packaging
 dist/
 build/
+<<<<<<< HEAD
 *.egg-info/**/.DS_Store
 .DS_Store
+=======
+*.egg-info/
+>>>>>>> 0108c29 (refactor: refactor nhl api code)
