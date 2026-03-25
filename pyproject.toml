@@ -1,0 +1,33 @@
+[project]
+name = "lordstanley"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Eric Evenson",email = "eric_evenson@outlook.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "aiohttp (>=3.13.1,<4.0.0)",
+    "asyncio (>=4.0.0,<5.0.0)",
+    "requests (>=2.32.5,<3.0.0)",
+    "pandas (>=2.3.3,<3.0.0)"
+]
+
+[tool.poetry]
+packages = [
+    {include = "lord_stanley", from = "src"},
+    {include = "nhl_api", from = "src"}
+]
+
+[tool.mypy]
+mypy_path = "src"
+include = ["src/nhl_api/py.typed"]
+
+[[tool.mypy.overrides]]
+module = "nhl_api.*"
+ignore_missing_imports = true
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
