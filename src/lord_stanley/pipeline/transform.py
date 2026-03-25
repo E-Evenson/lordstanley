@@ -52,12 +52,12 @@ def _clean_schedule(df: pd.DataFrame) -> pd.DataFrame:
     df = df.astype(SCHEDULE_DTYPES)  # type: ignore[arg-type]
     df = df[df["game_type"] == "2"]
     df = df.sort_values("id").reset_index(drop=True)
-    df[["winner_id", "loser_id"]] = df.apply(
+    df[["winner_abbrev", "loser_abbrev"]] = df.apply(
         lambda row: _get_winner_loser(row), axis=1, result_type="expand"
     )
-    df[["winner_id", "loser_id"]] = df[["winner_id", "loser_id"]].astype(
-        pd.StringDtype()
-    )
+    df[["winner_abbrev", "loser_abbrev"]] = df[
+        ["winner_abbrev", "loser_abbrev"]
+    ].astype(pd.StringDtype())
     return df
 
 
@@ -65,5 +65,5 @@ def _get_winner_loser(row: pd.Series) -> tuple[int | None, int | None]:
     if row["game_state"] not in COMPLETED_STATES:
         return None, None
     if row["home_team_score"] > row["away_team_score"]:
-        return row["home_team_id"], row["away_team_id"]
-    return row["away_team_id"], row["home_team_id"]
+        return row["home_team_abbrev"], row["away_team_abbrev"]
+    return row["away_team_abbrev"], row["home_team_abbrev"]
