@@ -42,6 +42,7 @@ GAME_COLUMNS = {
     "homeTeam.score": "home_team_score",
     "periodDescriptor.number": "period_descriptor",
     "clock.timeRemaining": "clock_time_remaining",
+    "clock.inIntermission": "in_intermission",
 }
 
 GAME_DTYPES = {
@@ -55,6 +56,7 @@ GAME_DTYPES = {
     "home_team_score": pd.Int64Dtype(),
     "period_descriptor": pd.StringDtype(),
     "clock_time_remaining": pd.StringDtype(),
+    "in_intermission": pd.BooleanDtype(),
 }
 
 
