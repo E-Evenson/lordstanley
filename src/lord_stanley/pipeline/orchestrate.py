@@ -1,7 +1,9 @@
+import pandas as pd
+
 from lord_stanley.pipeline import extract, transform, load
 
 
-def run_schedule_etl(season: str) -> None:
+def run_schedule_etl(season: str) -> pd.DataFrame:
     """
     Extract, transform, and load the full season schedule
     Args:
@@ -10,6 +12,7 @@ def run_schedule_etl(season: str) -> None:
     raw_schedule = extract.extract_season_schedule(season)
     transformed_schedule = transform.transform_season_schedule(raw_schedule)
     load.save_schedule(transformed_schedule, season)
+    return transformed_schedule
 
 
 if __name__ == "__main__":

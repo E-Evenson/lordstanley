@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def calculate_cup_possession(
+def get_cup_games(
     schedule: pd.DataFrame,
     cup_holder_start: str,
 ) -> pd.DataFrame:
@@ -23,4 +23,5 @@ def calculate_cup_possession(
                 break
             cup_holder = game["winner_abbrev"]
 
+    df = df[df["is_cup_game"]]
     return df
