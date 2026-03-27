@@ -15,7 +15,8 @@ def run_schedule_etl(season: str) -> pd.DataFrame:
     return transformed_schedule
 
 
-if __name__ == "__main__":
-    from lord_stanley.config import CURRENT_SEASON
+def run_game_etl(game_id: str) -> pd.DataFrame:
+    raw_game = extract.extract_single_game(game_id)
+    transformed_game = transform.transform_game_data(raw_game)
 
-    run_schedule_etl(CURRENT_SEASON)
+    return transformed_game

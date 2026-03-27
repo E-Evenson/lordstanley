@@ -31,6 +31,32 @@ SCHEDULE_DTYPES = {
     "home_team_score": pd.Int64Dtype(),
 }
 
+GAME_COLUMNS = {
+    "id": "id",
+    "gameDate": "game_date",
+    "startTimeUTC": "start_time",
+    "gameState": "game_state",
+    "awayTeam.abbrev": "away_team_abbrev",
+    "awayTeam.score": "away_team_score",
+    "homeTeam.abbrev": "home_team_abbrev",
+    "homeTeam.score": "home_team_score",
+    "periodDescriptor.number": "period_descriptor",
+    "clock.timeRemaining": "clock_time_remaining",
+}
+
+GAME_DTYPES = {
+    "id": pd.StringDtype(),
+    "game_date": "datetime64[ns]",
+    "start_time": "datetime64[ns, UTC]",
+    "game_state": pd.StringDtype(),
+    "away_team_abbrev": pd.StringDtype(),
+    "away_team_score": pd.Int64Dtype(),
+    "home_team_abbrev": pd.StringDtype(),
+    "home_team_score": pd.Int64Dtype(),
+    "period_descriptor": pd.StringDtype(),
+    "clock_time_remaining": pd.StringDtype(),
+}
+
 
 def transform_season_schedule(raw_schedule: list[dict[str, Any]]) -> pd.DataFrame:
     """
@@ -67,3 +93,18 @@ def _get_winner_loser(row: pd.Series) -> tuple[int | None, int | None]:
     if row["home_team_score"] > row["away_team_score"]:
         return row["home_team_abbrev"], row["away_team_abbrev"]
     return row["away_team_abbrev"], row["home_team_abbrev"]
+
+
+def transform_game_data(raw_game: dict[str, Any]) -> pd.DataFrame:
+
+    game_data = pd.json_normalize(raw_game)
+    game_data = game_data.reindex(columns=list(GAME_COLUMNS.keys())).rename(
+        columns=GAME_COLUMNS
+    )
+
+    game_data = game_data.astype(GAME_DTYPES)  # type: ignore[arg-type]
+    game_data["start_time"] = (
+        game_data["start_time"].dt.tz_convert("America/Edmonton").dt.strftime("%H:%M")
+    )
+
+    return game_data
