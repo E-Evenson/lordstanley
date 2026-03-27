@@ -39,7 +39,10 @@ def _get_next_game_data(cup_schedule: pd.DataFrame) -> tuple[pd.DataFrame, str]:
 def run():
 
     schedule_path = PROCESSED_DIR / f"{CURRENT_SEASON}_schedule.parquet"
-    schedule = pd.read_parquet(schedule_path)
+    if not schedule_path.exists():
+        schedule = pipeline_orchestrate.run_schedule_etl(CURRENT_SEASON)
+    else:
+        schedule = pd.read_parquet(schedule_path)
     cup_schedule = cup_possession.get_cup_games(schedule, CUP_HOLDER_START)
 
     draft_path = REFERENCE_DATA_DIR / f"drafts/{CURRENT_SEASON}.csv"
@@ -77,6 +80,7 @@ def run():
         "team_stats": team_stats,
         "cumulative_owner_stats": cumulative_owner_stats,
         "next_game": next_game,
+        "next_game_state": next_game_state,
     }
 
     return display_data

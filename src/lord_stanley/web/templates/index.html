@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Lord Stanley</title>
+</head>
+
+<body>
+    <h1>Standings</h1>
+    {{ standings_table | safe }}
+
+    <h1>Next Game{{ is_live }}</h1>
+    {{ next_game_table | safe }}
+
+    {{ chart | safe }}
+</body>
+
+</html>
