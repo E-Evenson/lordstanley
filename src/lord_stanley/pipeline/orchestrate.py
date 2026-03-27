@@ -17,7 +17,6 @@ def run_schedule_etl(season: str) -> pd.DataFrame:
 
 def run_game_etl(game_id: str) -> pd.DataFrame:
     raw_game = extract.extract_single_game(game_id)
-    print(raw_game)
     transformed_game = transform.transform_game_data(raw_game)
 
     return transformed_game

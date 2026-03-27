@@ -117,12 +117,8 @@ def calculate_cumulative_owner_stats(
 
     owners_cumulative_stats[
         ["owner_cumulative_wins", "owner_cumulative_games_played"]
-    ] = (
-        owners_cumulative_stats[
-            ["owner_cumulative_wins", "owner_cumulative_games_played"]
-        ]
-        .fillna(0)
-        .ffill()
-    )
+    ] = owners_cumulative_stats.groupby("owner")[
+        ["owner_cumulative_wins", "owner_cumulative_games_played"]
+    ].transform(lambda x: x.ffill().fillna(0))
 
     return owners_cumulative_stats
