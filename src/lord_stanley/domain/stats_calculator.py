@@ -1,16 +1,15 @@
-import time
 import logging
 
 import pandas as pd
 
 
 def calculate_league_standings(
-    cup_games_with_owners: pd.DataFrame, draft: pd.DataFrame
+    completed_cup_games_with_owners: pd.DataFrame, draft: pd.DataFrame
 ) -> pd.DataFrame:
 
-    win_counts = cup_games_with_owners["winner_owner"].value_counts()
+    win_counts = completed_cup_games_with_owners["winner_owner"].value_counts()
     games_played = win_counts.add(
-        cup_games_with_owners["loser_owner"].value_counts(), fill_value=0
+        completed_cup_games_with_owners["loser_owner"].value_counts(), fill_value=0
     )
 
     stats = (
@@ -39,12 +38,12 @@ def calculate_league_standings(
 
 
 def calculate_team_stats(
-    cup_games_with_owners: pd.DataFrame, draft: pd.DataFrame
+    completed_cup_games_with_owners: pd.DataFrame, draft: pd.DataFrame
 ) -> pd.DataFrame:
 
-    win_counts = cup_games_with_owners["winner_abbrev"].value_counts()
+    win_counts = completed_cup_games_with_owners["winner_abbrev"].value_counts()
     games_played = win_counts.add(
-        cup_games_with_owners["loser_abbrev"].value_counts(), fill_value=0
+        completed_cup_games_with_owners["loser_abbrev"].value_counts(), fill_value=0
     )
 
     team_stats = (
@@ -71,28 +70,59 @@ def calculate_team_stats(
     return ranked_team_stats_with_owners
 
 
-if __name__ == "__main__":
-    from pathlib import Path
-    from lord_stanley.pipeline import orchestrate
-    from lord_stanley.domain import cup_possession, assign_owners
-    from lord_stanley.config import CURRENT_SEASON, CUP_HOLDER_START
+def calculate_cumulative_owner_stats(
+    completed_cup_games_with_owners: pd.DataFrame, draft: pd.DataFrame
+) -> pd.DataFrame:
 
-    t0 = time.perf_counter()
-    draft = pd.read_csv(Path().cwd() / "reference_data/drafts/20252026.csv")
-    t1 = time.perf_counter()
-    schedule = orchestrate.run_schedule_etl(CURRENT_SEASON)
-    t2 = time.perf_counter()
-    schedule = pd.read_parquet(
-        Path().cwd() / f"data/processed/{CURRENT_SEASON}_schedule.parquet"
+    owners_cumulative_stats = completed_cup_games_with_owners.copy()
+
+    owners_cumulative_stats = pd.melt(
+        owners_cumulative_stats,
+        "game_date",
+        ["winner_owner", "loser_owner"],
+        var_name="result",
+        value_name="owner",
+    ).sort_values("game_date")
+
+    owners_cumulative_stats["is_win"] = (
+        owners_cumulative_stats["result"] == "winner_owner"
     )
-    t3 = time.perf_counter()
-    cup_games = cup_possession.get_cup_games(schedule, CUP_HOLDER_START)
-    owners_assigned = assign_owners.assign_owners(cup_games, draft)
-    standings = calculate_league_standings(owners_assigned, draft)
-    t6 = time.perf_counter()
-    print(standings)
-    print(f"etl time: {t2 - t1}")
-    print(f"parquet time: {t3 - t2}")
-    print(f"Time after retrieving raw schedule: {t6 - t3}")
-    team_stats = calculate_team_stats(owners_assigned, draft)
-    print(team_stats)
+
+    owners_cumulative_stats["owner_cumulative_wins"] = (
+        owners_cumulative_stats["is_win"]
+        .groupby(owners_cumulative_stats["owner"])
+        .cumsum()
+        .astype(pd.Int64Dtype())
+    )
+
+    owners_cumulative_stats["owner_cumulative_games_played"] = (
+        owners_cumulative_stats.groupby("owner").cumcount() + 1
+    ).astype(pd.Int64Dtype())
+
+    owners = draft[["owner"]].drop_duplicates()
+    all_cup_game_dates = completed_cup_games_with_owners[
+        ["game_date"]
+    ].drop_duplicates()
+
+    full_game_grid = pd.merge(owners, all_cup_game_dates, how="cross").sort_values(
+        "game_date"
+    )
+
+    owners_cumulative_stats = pd.merge(
+        full_game_grid,
+        owners_cumulative_stats,
+        how="left",
+        on=["game_date", "owner"],
+    )
+
+    owners_cumulative_stats[
+        ["owner_cumulative_wins", "owner_cumulative_games_played"]
+    ] = (
+        owners_cumulative_stats[
+            ["owner_cumulative_wins", "owner_cumulative_games_played"]
+        ]
+        .fillna(0)
+        .ffill()
+    )
+
+    return owners_cumulative_stats
