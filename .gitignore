@@ -1,0 +1,47 @@
+.venv/
+__pycache__/
+.mypy_cache
+.vscode/
+data/schedules/
+data/learning/
+testing_*
+logs/
+data/*
+static/*
+learning*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.mypy_cache/
+.pytest_cache/
+*.pyc
+
+# Environment
+.venv/
+.env
+.env.*
+
+# Config
+config/
+*.ini
+
+# Data - generated files shouldn't be versioned
+data/
+
+# Logs
+logs/
+*.log
+
+# VS Code
+.vscode/
+
+# pyenv
+.python-version
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/**/.DS_Store
+.DS_Store
