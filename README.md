@@ -21,7 +21,7 @@ poetry install
 
 #### Run:
 
-poetry run flask --app src/lord_stanley/web/app.py run  
+poetry run flask --app src/lord_stanley/app.py run  
 
 Then open http://127.0.0.1:5000 in your browser.
 
