@@ -37,10 +37,11 @@ def _map_owners(game_data: pd.DataFrame, draft: pd.DataFrame) -> pd.DataFrame:
 
 
 def _format_future_game(game_data: pd.DataFrame) -> pd.DataFrame:
-    future_game = game_data[FUTURE_GAME_COLUMNS.keys()].rename(
+    future_game = game_data.copy()
+    future_game["game_date"] = future_game["game_date"].dt.strftime("%B %e, %Y")
+    future_game = future_game[FUTURE_GAME_COLUMNS.keys()].rename(
         columns=FUTURE_GAME_COLUMNS
     )
-
     return future_game
 
 
