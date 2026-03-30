@@ -26,6 +26,24 @@ LIVE_GAME_COLUMNS = {
 }
 
 
+def format_league_standings(league_standings: pd.DataFrame) -> pd.DataFrame:
+    formatted_league_standings = league_standings.copy()
+    formatted_league_standings["win_percentage"] = formatted_league_standings[
+        "win_percentage"
+    ].apply(lambda x: f"{x}%")
+    formatted_league_standings = formatted_league_standings.reset_index().rename(
+        columns={
+            "position": "Position",
+            "owner": "Owner",
+            "points": "Points",
+            "games_played": "Games Played",
+            "win_percentage": "Win %",
+        }
+    )
+
+    return formatted_league_standings
+
+
 def _map_owners(game_data: pd.DataFrame, draft: pd.DataFrame) -> pd.DataFrame:
     game_data_with_owners = game_data.copy()
     owner_map = draft.set_index("team_abbrev")["owner"]
@@ -60,20 +78,6 @@ def _format_live_game(game_data: pd.DataFrame) -> pd.DataFrame:
     live_game = live_game[LIVE_GAME_COLUMNS.keys()].rename(columns=LIVE_GAME_COLUMNS)
 
     return live_game
-
-
-def format_league_standings(league_standings: pd.DataFrame) -> pd.DataFrame:
-    formatted_league_standings = league_standings.copy()
-    formatted_league_standings = formatted_league_standings.reset_index().rename(
-        columns={
-            "position": "Position",
-            "owner": "Owner",
-            "points": "Points",
-            "games_played": "Games Played",
-        }
-    )
-
-    return formatted_league_standings
 
 
 def format_next_game(

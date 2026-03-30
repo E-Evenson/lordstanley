@@ -23,6 +23,10 @@ def calculate_league_standings(
         .rename(columns={"index": "owner"})
     )
 
+    stats["win_percentage"] = round(
+        stats["points"] / stats["games_played"] * 100, ndigits=1
+    )
+
     owners = draft[["owner"]].drop_duplicates()
 
     standings = pd.merge(left=owners, right=stats, how="left", on="owner").fillna(0)
