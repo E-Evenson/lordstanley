@@ -10,7 +10,6 @@ from nhl_api.constants import (
     WEB_API_BASE_URL,
     GAME_BOXSCORE_URL,
     TEAM_FULL_SEASON_SCHEDULE_URL,
-    ACTIVE_TEAM_TRICODES,
 )
 
 
@@ -150,7 +149,7 @@ def fetch_game_data(game_id: str) -> dict[str, Any]:
     return game_data
 
 
-async def _fetch_team_schedule(
+async def _fetch_single_team_schedule(
     session: aiohttp.ClientSession, team: str, season: str
 ) -> list[dict[str, Any]]:
     """
@@ -187,20 +186,20 @@ async def _fetch_team_schedule(
     return team_games_list
 
 
-async def fetch_all_team_schedules(
+async def fetch_team_schedules(
     season: str,
-    all_teams: list[str] = ACTIVE_TEAM_TRICODES,
+    teams: list[str],
 ) -> list[dict[str, Any]]:
     """
-    Fetch the full season schedule for all teams
+    Fetch the full season schedule for each team in a list of teams
 
-    NOTE: this will have duplicated games as every game has two teams, and will show up
+    NOTE: this will likely have duplicated games as every game has two teams, and will show up
     on each team's schedule. It will also include duplicates for any team triCode that
-    appears more than once (e.g. UTA, Utah Mammoth and Utah Hockey Club)
+    appears more than once
 
     Args:
         season: Season to fetch team schedules for.
-        all_teams: Teams to fetch season schedules for.
+        teams: Teams to fetch season schedules for.
 
     Returns:
         A list of dicts, where each dict is a single game's data
@@ -212,11 +211,11 @@ async def fetch_all_team_schedules(
 
     """
 
-    logger.info(f"Running fetch_all_team_schedules for {season}")
+    logger.info(f"Running fetch_team_schedules for {season}")
 
     async with aiohttp.ClientSession() as session:
         team_schedules = await asyncio.gather(
-            *(_fetch_team_schedule(session, team, season) for team in all_teams)
+            *(_fetch_single_team_schedule(session, team, season) for team in teams)
         )
 
     schedules_extracted = 0
@@ -227,7 +226,7 @@ async def fetch_all_team_schedules(
         all_games.extend(team)
 
     logger.info(
-        f"Finished running fetch_all_team_schedules for {season}. {schedules_extracted} team's schedules returned"
+        f"Finished running fetch_team_schedules for {season}. {schedules_extracted} team's schedules returned"
     )
     return all_games
 

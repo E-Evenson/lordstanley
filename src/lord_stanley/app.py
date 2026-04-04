@@ -13,7 +13,7 @@ app = Flask(__name__)
 @app.route("/")
 def index():
 
-    display_data = domain_orchestrator.run()
+    display_data = domain_orchestrator.run_league_calculations()
 
     raw_league_standings = display_data["league_standings"]
     league_standings = formatters.format_league_standings(raw_league_standings)
