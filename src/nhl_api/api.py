@@ -1,3 +1,15 @@
+"""
+NHL API client for fetching raw data from the NHL Web API.
+
+Responsibilities:
+    - HTTP requests to NHL API endpoints
+    - Returning raw parsed JSON
+
+Not responsible for:
+    - Data transformation or validation
+    - Business logic or domain concepts
+"""
+
 import logging
 from typing import Any
 
@@ -6,7 +18,6 @@ import aiohttp  # type: ignore
 import requests  # type: ignore
 
 from nhl_api.constants import (
-    STATS_API_BASE_URL,
     WEB_API_BASE_URL,
     GAME_BOXSCORE_URL,
     TEAM_FULL_SEASON_SCHEDULE_URL,
@@ -76,50 +87,6 @@ async def _async_fetch(session: aiohttp.ClientSession, url: str) -> dict[str, An
             )
 
         return data
-
-
-def fetch_team_data() -> list[dict[str, Any]]:
-    """
-    Fetch basic data for all NHL teams
-
-    This data includes:
-    id,
-    franchiseId,
-    fullName,
-    leagueId,
-    rawTricode,
-    triCode
-
-    For example, Calgary Flames and Atlanta Flames would have
-    different ids but the same franchise ids, because they moved from
-    Atlanta to Calgary. So they are the same franchise, but a different team. While the
-    Phoenix/Arizona Coyotes were franchise 28, but the Utah Mammoth are franchise 40.
-    Also note that the Utah Hockey Club and Utah Mammoth are separate entries with
-    different ids, but the same triCode. The Utah Mammoth is correct, with id=68
-
-    To be run when a team moves, renames, or the league expands
-
-    Returns:
-        Parsed JSON response as a list of dictionaries
-
-    Raises:
-        ValueError: If the data key is missing
-    """
-
-    logger.info("Running fetch_team_data")
-    team_data_url = f"{STATS_API_BASE_URL}/team"
-
-    teams_data = _sync_fetch(team_data_url)
-    teams_list = teams_data.get("data")
-
-    if teams_list is None:
-        raise ValueError(
-            "Unexpected response structure from NHL API — 'data' key missing"
-        )
-
-    logger.info("Finished running fetch_team_data")
-
-    return teams_list
 
 
 def fetch_game_data(game_id: str) -> dict[str, Any]:

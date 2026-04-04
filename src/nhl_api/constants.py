@@ -1,4 +1,3 @@
-STATS_API_BASE_URL = "https://api.nhle.com/stats/rest/en"
 WEB_API_BASE_URL = "https://api-web.nhle.com/v1"
 
 GAME_BOXSCORE_URL = "/gamecenter/{game_id}/boxscore"
