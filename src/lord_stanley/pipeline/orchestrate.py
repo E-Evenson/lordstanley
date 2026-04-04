@@ -58,3 +58,9 @@ def run_game_etl(game_id: str) -> pd.DataFrame:
     logger.info("Finished running game ETL")
 
     return transformed_game
+
+
+if __name__ == "__main__":
+    from lord_stanley.domain.constants import ACTIVE_TEAM_TRICODES
+
+    run_schedule_etl("20252026", ACTIVE_TEAM_TRICODES)

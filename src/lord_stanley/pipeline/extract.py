@@ -66,3 +66,13 @@ def extract_single_game(game_id: str) -> dict[str, Any]:
     game_data = fetch_game_data(game_id)
 
     return game_data
+
+
+if __name__ == "__main__":
+    import json
+
+    game_id = "2025021209"
+    raw_game = fetch_game_data(game_id)
+
+    with open(f"tests/data/game/{game_id}.json", "w") as f:
+        json.dump(raw_game, f)

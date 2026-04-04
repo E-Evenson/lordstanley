@@ -17,7 +17,7 @@ import pandas as pd
 
 from lord_stanley.constants import COMPLETED_STATES
 from lord_stanley.pipeline.constants import (
-    SCHEDULE_COLUMNS,
+    SCHEDULE_COLUMNS_RENAME_MAP,
     SCHEDULE_DTYPES,
     GAME_COLUMNS,
     GAME_DTYPES,
@@ -66,7 +66,9 @@ def _clean_schedule(raw_df: pd.DataFrame) -> pd.DataFrame:
     cleaned_df = raw_df.copy()
 
     cleaned_df = cleaned_df.drop_duplicates(subset="id")
-    cleaned_df = cleaned_df[SCHEDULE_COLUMNS.keys()].rename(columns=SCHEDULE_COLUMNS)
+    cleaned_df = cleaned_df[SCHEDULE_COLUMNS_RENAME_MAP.keys()].rename(
+        columns=SCHEDULE_COLUMNS_RENAME_MAP
+    )
     cleaned_df = cleaned_df.astype(SCHEDULE_DTYPES)  # type: ignore[arg-type]
     cleaned_df = cleaned_df[cleaned_df["game_type"] == "2"]
 
@@ -133,7 +135,10 @@ def transform_game_data(raw_game: dict[str, Any]) -> pd.DataFrame:
     game_data = game_data.astype(GAME_DTYPES)  # type: ignore[arg-type]
 
     game_data["start_time"] = (
-        game_data["start_time"].dt.tz_convert("America/Edmonton").dt.strftime("%H:%M")
+        game_data["start_time"]
+        .dt.tz_convert("America/Edmonton")
+        .dt.strftime("%H:%M")
+        .astype(pd.StringDtype())
     )
 
     logger.info("Finished running game transformation")

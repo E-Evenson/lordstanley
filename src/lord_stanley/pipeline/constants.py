@@ -7,7 +7,8 @@ import pandas as pd
 
 COMPLETED_STATES = {"FINAL", "OFF"}
 
-SCHEDULE_COLUMNS = {
+
+SCHEDULE_COLUMNS_RENAME_MAP = {
     "id": "id",
     "gameType": "game_type",
     "gameDate": "game_date",
@@ -19,6 +20,7 @@ SCHEDULE_COLUMNS = {
     "homeTeam.abbrev": "home_team_abbrev",
     "homeTeam.score": "home_team_score",
 }
+
 
 SCHEDULE_DTYPES = {
     "id": pd.StringDtype(),
@@ -32,6 +34,21 @@ SCHEDULE_DTYPES = {
     "home_team_abbrev": pd.StringDtype(),
     "home_team_score": pd.Int64Dtype(),
 }
+
+
+SCHEDULE_OUTPUT_COLUMNS = [
+    *SCHEDULE_DTYPES.keys(),
+    "winner_abbrev",
+    "loser_abbrev",
+]
+
+
+SCHEDULE_OUTPUT_DTYPES = {
+    **SCHEDULE_DTYPES,
+    "winner_abbrev": pd.StringDtype(),
+    "loser_abbrev": pd.StringDtype(),
+}
+
 
 GAME_COLUMNS = {
     "id": "id",
@@ -47,6 +64,7 @@ GAME_COLUMNS = {
     "clock.inIntermission": "in_intermission",
 }
 
+
 GAME_DTYPES = {
     "id": pd.StringDtype(),
     "game_date": "datetime64[ns]",
@@ -59,4 +77,13 @@ GAME_DTYPES = {
     "period_descriptor": pd.StringDtype(),
     "clock_time_remaining": pd.StringDtype(),
     "in_intermission": pd.BooleanDtype(),
+}
+
+
+GAME_OUTPUT_COLUMNS = [*GAME_DTYPES.keys()]
+
+
+GAME_OUTPUT_DTYPES = {
+    **GAME_DTYPES,
+    "start_time": pd.StringDtype(),
 }
