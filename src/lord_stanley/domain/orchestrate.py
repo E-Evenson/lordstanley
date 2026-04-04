@@ -12,6 +12,7 @@ Responsibilities:
 """
 
 import logging
+from typing import TypedDict
 
 import pandas as pd
 
@@ -51,18 +52,25 @@ def _get_next_game_data(cup_schedule: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     return raw_next_game_data, next_game_state
 
 
-def run_league_calculations() -> dict[str, pd.DataFrame | str]:
+class LeagueCalculationsResult(TypedDict):
+    """
+    Return type for run_league_calculations.
+    """
+
+    league_standings: pd.DataFrame
+    team_stats: pd.DataFrame
+    cumulative_owner_stats: pd.DataFrame
+    next_game: pd.DataFrame
+    next_game_state: str
+    draft: pd.DataFrame
+
+
+def run_league_calculations() -> LeagueCalculationsResult:
     """
     Orchestrate all domain logic and calculations for Lord Stanley
 
     Returns:
-        Dictionary containing:
-            league_standings: Dataframe of owner stats and standings
-            team_stats: Dataframe of NHL team stats
-            cumulative_owner_stats: Dataframe of cumulative owner stats
-            next_game: Dataframe of next game details
-            next_game_state: string indicating next game state (future, live, finished)
-            draft: Dataframe of the draft
+        Typed dict containing league calculations
     """
     logger.info("Running league calculations.")
 
@@ -100,7 +108,7 @@ def run_league_calculations() -> dict[str, pd.DataFrame | str]:
         completed_cup_games_with_owners, draft
     )
 
-    display_data = {
+    display_data: LeagueCalculationsResult = {
         "league_standings": league_standings,
         "team_stats": team_stats,
         "cumulative_owner_stats": cumulative_owner_stats,
