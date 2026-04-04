@@ -1,3 +1,16 @@
+"""
+Orchestration layer for the Lord Stanely domain calculations
+
+Responsibilities:
+    - Which season it is
+    - Which NHL teams are included
+    - Which team starts with the cup
+    - Ensuring schedule data exists
+    - Running game ETL
+    - Running schedule ETL
+    - Applying domain calculations in the correct order
+"""
+
 import logging
 
 import pandas as pd
@@ -21,6 +34,15 @@ logger = logging.getLogger(__name__)
 
 
 def _get_next_game_data(cup_schedule: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    """
+    Find next cup game and run game ETL for it
+
+    Args:
+        cup_schedule: schedule of cup games
+
+    Returns:
+        Next game data and next game state
+    """
     next_cup_game = cup_schedule.tail(1)
     next_cup_game_id = next_cup_game["id"].item()
     raw_next_game_data = pipeline.run_game_etl(next_cup_game_id)
@@ -29,9 +51,18 @@ def _get_next_game_data(cup_schedule: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     return raw_next_game_data, next_game_state
 
 
-def run_league_calculations():
+def run_league_calculations() -> dict[str, pd.DataFrame | str]:
     """
-    Run all the calculations required for league stats and standings
+    Orchestrate all domain logic and calculations for Lord Stanley
+
+    Returns:
+        Dictionary containing:
+            league_standings: Dataframe of owner stats and standings
+            team_stats: Dataframe of NHL team stats
+            cumulative_owner_stats: Dataframe of cumulative owner stats
+            next_game: Dataframe of next game details
+            next_game_state: string indicating next game state (future, live, finished)
+            draft: Dataframe of the draft
     """
     logger.info("Running league calculations.")
 

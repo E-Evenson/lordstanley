@@ -1,3 +1,13 @@
+"""
+Stats and standings calculation layer for Lord Stanley domain calculations
+
+Responsibilities:
+    - Fantasy owner stats
+    - Fantasy league owner standings
+    - Cumulative fantasy owner stats
+    - NHL team stats
+"""
+
 import logging
 
 import pandas as pd
@@ -6,6 +16,16 @@ import pandas as pd
 def calculate_league_standings(
     completed_cup_games_with_owners: pd.DataFrame, draft: pd.DataFrame
 ) -> pd.DataFrame:
+    """
+    Calculates owner stats and league standings
+
+    Args:
+        completed_cup_games_with_owners: dataframe of all cup games with owner info
+        draft: draft to calculate stats for
+
+    Returns:
+        League standings dataframe with stats
+    """
 
     win_counts = completed_cup_games_with_owners["winner_owner"].value_counts()
     games_played = win_counts.add(
@@ -44,6 +64,16 @@ def calculate_league_standings(
 def calculate_team_stats(
     completed_cup_games_with_owners: pd.DataFrame, draft: pd.DataFrame
 ) -> pd.DataFrame:
+    """
+    Calculates season stats for each NHL team
+
+    Args:
+        completed_cup_games_with_owners: dataframe of all cup games with owner info
+        draft: draft to calculate stats for
+
+    Returns:
+        Dataframe with team stats, including owner, and team rankings for each owner
+    """
 
     win_counts = completed_cup_games_with_owners["winner_abbrev"].value_counts()
     games_played = win_counts.add(
@@ -77,6 +107,16 @@ def calculate_team_stats(
 def calculate_cumulative_owner_stats(
     completed_cup_games_with_owners: pd.DataFrame, draft: pd.DataFrame
 ) -> pd.DataFrame:
+    """
+    Calculates owner stats cumulatively over the course of the season
+
+    Args:
+        completed_cup_games_with_owners: dataframe of all cup games with owner info
+        draft: draft to calculate stats for
+
+    Returns:
+        Dataframe of cumulative stats for each owner over the course of the season
+    """
 
     owners_cumulative_stats = completed_cup_games_with_owners.copy()
 

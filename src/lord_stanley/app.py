@@ -1,3 +1,13 @@
+"""
+Lord Stanley webapp
+
+Responsibilities:
+    - Calling domain layer
+    - Passing raw data to formatter layer
+    - Next game display formatting
+    - Converting to html
+"""
+
 import logging
 
 from flask import Flask, render_template
@@ -12,7 +22,9 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-
+    """
+    Render the Lord Stanley league standings and next cup game page.
+    """
     display_data = domain_orchestrator.run_league_calculations()
 
     raw_league_standings = display_data["league_standings"]

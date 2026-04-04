@@ -1,3 +1,14 @@
+"""
+Extraction layer for the Lord Stanley ETL pipeline
+
+Responsibilites:
+    - Fetching raw data from NHL API
+    - Persisting raw schedule to disk as JSON
+
+Not responsible for:
+    - Data validation, transformation, or business logic
+"""
+
 import json
 from typing import Any
 
@@ -10,6 +21,7 @@ from nhl_api.api import fetch_team_schedules, fetch_game_data
 def _save_raw(schedule: list[dict[str, Any]], season: str) -> None:
     """
     Save raw schedule data to disk as JSON
+
     Args:
         schedule: Raw schedule data to save
         season: Season code, used to name the file
@@ -23,6 +35,7 @@ def _save_raw(schedule: list[dict[str, Any]], season: str) -> None:
 def extract_season_schedule(season: str, teams: list[str]) -> list[dict[str, Any]]:
     """
     Get the full season schedule for a list of teams for a given season
+    and persist to disk
 
     Args:
         season: The season code to get the schedule for

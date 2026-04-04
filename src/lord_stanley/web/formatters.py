@@ -1,3 +1,12 @@
+"""
+Formatting layer for web display
+
+Responsibilities:
+    - Formatting dataframes for display
+    - Determining next game display state
+    - Creating cumulative points chart
+"""
+
 import logging
 
 import pandas as pd
@@ -27,6 +36,15 @@ LIVE_GAME_COLUMNS = {
 
 
 def format_league_standings(league_standings: pd.DataFrame) -> pd.DataFrame:
+    """
+    Formats league standings and adds win % column
+
+    Args:
+        league_standings: unformatted league stats and standings
+
+    Returns:
+        Dataframe with league standings formatted for display
+    """
     formatted_league_standings = league_standings.copy()
     formatted_league_standings["win_percentage"] = formatted_league_standings[
         "win_percentage"
@@ -45,6 +63,16 @@ def format_league_standings(league_standings: pd.DataFrame) -> pd.DataFrame:
 
 
 def _map_owners(game_data: pd.DataFrame, draft: pd.DataFrame) -> pd.DataFrame:
+    """
+    Map owners to game data
+
+    Args:
+        game_data: next game data
+        draft: draft data
+
+    Returns:
+        Dataframe with next game data with owners added, formatted for display
+    """
     game_data_with_owners = game_data.copy()
     owner_map = draft.set_index("team_abbrev")["owner"]
 
@@ -55,6 +83,15 @@ def _map_owners(game_data: pd.DataFrame, draft: pd.DataFrame) -> pd.DataFrame:
 
 
 def _format_future_game(game_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Formats next game data for future games
+
+    Args:
+        game_data: next game data
+
+    Returns:
+        Dataframe with next game data formatted for future games
+    """
     future_game = game_data.copy()
     future_game["game_date"] = future_game["game_date"].dt.strftime("%B %e, %Y")
     future_game = future_game[FUTURE_GAME_COLUMNS.keys()].rename(
@@ -64,6 +101,15 @@ def _format_future_game(game_data: pd.DataFrame) -> pd.DataFrame:
 
 
 def _format_live_game(game_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Formats next game data for live games
+
+    Args:
+        game_data: next game data
+
+    Returns:
+        Dataframe with next game data formatted for live games
+    """
     live_game = game_data.copy()
 
     if live_game["in_intermission"].item():
@@ -83,6 +129,18 @@ def _format_live_game(game_data: pd.DataFrame) -> pd.DataFrame:
 def format_next_game(
     next_game_raw: pd.DataFrame, next_game_state: str, draft: pd.DataFrame
 ) -> tuple[pd.DataFrame, str]:
+    """
+    Formats next game data for display
+
+    Args:
+        next_game_raw: unformatted next game data
+        next_game_state: state of next game
+        draft: draft data
+
+    Returns:
+        Tuple with dataframe of next game data formatted for display, and string indicating
+        whether next game is live
+    """
 
     next_game = next_game_raw.copy()
     next_game = _map_owners(next_game, draft)
@@ -106,6 +164,15 @@ def format_next_game(
 def format_cumulative_points_chart(
     cumulative_owner_stats_raw: pd.DataFrame,
 ) -> go.Figure:
+    """
+    Creates chart of cumulative owner stats
+
+    Args:
+        cumulative_owner_stats_raw: unformatted cumulative owner stats
+
+    Returns:
+        Figure of cumulative owner stats chart
+    """
     cumulative_owner_stats = cumulative_owner_stats_raw.copy()
     fig = px.line(
         cumulative_owner_stats,

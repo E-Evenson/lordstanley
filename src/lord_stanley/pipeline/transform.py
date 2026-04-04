@@ -1,3 +1,15 @@
+"""
+Transformation layer for Lord Stanely ETL pipeline
+
+Responsibilities:
+    - Normalizing raw data
+    - Cleaning raw data
+    - Enriching raw data
+Not responsible for:
+    - Extracting raw data
+    - Applying domain logic
+"""
+
 from typing import Any
 
 import pandas as pd
@@ -60,21 +72,16 @@ GAME_DTYPES = {
 }
 
 
-def transform_season_schedule(raw_schedule: list[dict[str, Any]]) -> pd.DataFrame:
-    """
-    Transform raw schedule data into a cleaned DataFrame
-    Args:
-        raw_schedule: Raw schedule data from extract layer
-    Returns:
-        Cleaned DataFrame with winner/loser columns
-    """
-    df = pd.json_normalize(raw_schedule)
-    df = _clean_schedule(df)
-
-    return df
-
-
 def _clean_schedule(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean schedule data
+
+    Args:
+        df: Schedule data to clean
+
+    Returns:
+        Cleaned schedule dataframe
+    """
     df = df.drop_duplicates(subset="id")
     df = df[SCHEDULE_COLUMNS.keys()].rename(columns=SCHEDULE_COLUMNS)
     df = df.astype(SCHEDULE_DTYPES)  # type: ignore[arg-type]
@@ -86,19 +93,54 @@ def _clean_schedule(df: pd.DataFrame) -> pd.DataFrame:
     df[["winner_abbrev", "loser_abbrev"]] = df[
         ["winner_abbrev", "loser_abbrev"]
     ].astype(pd.StringDtype())
+
     return df
 
 
-def _get_winner_loser(row: pd.Series) -> tuple[int | None, int | None]:
+def _get_winner_loser(row: pd.Series) -> tuple[str | None, str | None]:
+    """
+    Calculate the winner and loser for completed games
+
+    Args:
+        row: single row of game data
+
+    Returns:
+        Team abbreviations for the winner and loser
+    """
     if row["game_state"] not in COMPLETED_STATES:
         return None, None
     if row["home_team_score"] > row["away_team_score"]:
         return row["home_team_abbrev"], row["away_team_abbrev"]
+
     return row["away_team_abbrev"], row["home_team_abbrev"]
 
 
-def transform_game_data(raw_game: dict[str, Any]) -> pd.DataFrame:
+def transform_season_schedule(raw_schedule: list[dict[str, Any]]) -> pd.DataFrame:
+    """
+    Transform raw schedule data into a cleaned DataFrame
 
+    Args:
+        raw_schedule: Raw schedule data from extract layer
+
+    Returns:
+        Cleaned DataFrame with winner/loser columns
+    """
+    df = pd.json_normalize(raw_schedule)
+    df = _clean_schedule(df)
+
+    return df
+
+
+def transform_game_data(raw_game: dict[str, Any]) -> pd.DataFrame:
+    """
+    Clean and transform raw game data
+
+    Args:
+        raw_game: raw game data in json
+
+    Returns:
+        Cleaned and transformed dataframe of game data
+    """
     game_data = pd.json_normalize(raw_game)
     game_data = game_data.reindex(columns=list(GAME_COLUMNS.keys())).rename(
         columns=GAME_COLUMNS

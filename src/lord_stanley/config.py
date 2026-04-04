@@ -1,3 +1,7 @@
+"""
+Configuration settings for Lord Stanley
+"""
+
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent.parent.parent  # repo root

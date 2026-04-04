@@ -1,3 +1,7 @@
+"""
+Domain level constants for Lord Stanley
+"""
+
 ACTIVE_TEAM_TRICODES = [
     "ANA",
     "BOS",

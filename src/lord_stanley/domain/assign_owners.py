@@ -1,3 +1,13 @@
+"""
+Fantasy owner calculation layer for Lord Stanley domain calculations
+
+Responsibilities:
+    - Mapping fantasy owner data to a season schedule
+
+Not responsible for:
+    - calculating owner or team stats
+"""
+
 import logging
 
 import pandas as pd
@@ -5,7 +15,7 @@ import pandas as pd
 
 def assign_owners(schedule: pd.DataFrame, draft: pd.DataFrame) -> pd.DataFrame:
     """
-    Assign owners to cup possession data
+    Map fantasy owners to schedule data
 
     Args:
         schedule: DataFrame containing the schedule data

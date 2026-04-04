@@ -1,3 +1,11 @@
+"""
+Orchestration layer for the Lord Stanley ETL pipeline
+
+Responsibilites:
+    - Orchestrate extract, transform, and load layers
+    - Receive and pass arguments to ETL layers
+"""
+
 import logging
 
 import pandas as pd
@@ -15,6 +23,9 @@ def run_schedule_etl(season: str, teams: list[str]) -> pd.DataFrame:
     Args:
         season: The season code to run the ETL for
         teams: The teams to get schedules for
+
+    Returns:
+        Dataframe of transformed schedule data
     """
     logger.info(f"Running schedule ETL for {len(teams)} for the {season} season.")
 
@@ -37,7 +48,7 @@ def run_game_etl(game_id: str) -> pd.DataFrame:
         game_id: Game ID for the game to retrieve
 
     Returns:
-        A dataframe with the data of the provided game_id
+        Dataframe of transformed game data
     """
     logger.info(f"Running ETL for game: {game_id}.")
 
