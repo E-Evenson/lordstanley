@@ -38,5 +38,6 @@ build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
 dev = [
-    "pandas-stubs (>=3.0.0.260204,<4.0.0.0)"
+    "pandas-stubs (>=3.0.0.260204,<4.0.0.0)",
+    "pytest (>=9.0.2,<10.0.0)"
 ]
