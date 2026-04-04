@@ -10,109 +10,78 @@ Not responsible for:
     - Applying domain logic
 """
 
+import logging
 from typing import Any
 
 import pandas as pd
 
-
-COMPLETED_STATES = {"FINAL", "OFF"}
-
-SCHEDULE_COLUMNS = {
-    "id": "id",
-    "gameType": "game_type",
-    "gameDate": "game_date",
-    "gameState": "game_state",
-    "awayTeam.id": "away_team_id",
-    "awayTeam.abbrev": "away_team_abbrev",
-    "awayTeam.score": "away_team_score",
-    "homeTeam.id": "home_team_id",
-    "homeTeam.abbrev": "home_team_abbrev",
-    "homeTeam.score": "home_team_score",
-}
-
-SCHEDULE_DTYPES = {
-    "id": pd.StringDtype(),
-    "game_type": pd.StringDtype(),
-    "game_date": "datetime64[ns]",
-    "game_state": pd.StringDtype(),
-    "away_team_id": pd.StringDtype(),
-    "away_team_abbrev": pd.StringDtype(),
-    "away_team_score": pd.Int64Dtype(),
-    "home_team_id": pd.StringDtype(),
-    "home_team_abbrev": pd.StringDtype(),
-    "home_team_score": pd.Int64Dtype(),
-}
-
-GAME_COLUMNS = {
-    "id": "id",
-    "gameDate": "game_date",
-    "startTimeUTC": "start_time",
-    "gameState": "game_state",
-    "awayTeam.abbrev": "away_team_abbrev",
-    "awayTeam.score": "away_team_score",
-    "homeTeam.abbrev": "home_team_abbrev",
-    "homeTeam.score": "home_team_score",
-    "periodDescriptor.number": "period_descriptor",
-    "clock.timeRemaining": "clock_time_remaining",
-    "clock.inIntermission": "in_intermission",
-}
-
-GAME_DTYPES = {
-    "id": pd.StringDtype(),
-    "game_date": "datetime64[ns]",
-    "start_time": "datetime64[ns, UTC]",
-    "game_state": pd.StringDtype(),
-    "away_team_abbrev": pd.StringDtype(),
-    "away_team_score": pd.Int64Dtype(),
-    "home_team_abbrev": pd.StringDtype(),
-    "home_team_score": pd.Int64Dtype(),
-    "period_descriptor": pd.StringDtype(),
-    "clock_time_remaining": pd.StringDtype(),
-    "in_intermission": pd.BooleanDtype(),
-}
+from lord_stanley.constants import COMPLETED_STATES
+from lord_stanley.pipeline.constants import (
+    SCHEDULE_COLUMNS,
+    SCHEDULE_DTYPES,
+    GAME_COLUMNS,
+    GAME_DTYPES,
+)
 
 
-def _clean_schedule(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Clean schedule data
-
-    Args:
-        df: Schedule data to clean
-
-    Returns:
-        Cleaned schedule dataframe
-    """
-    df = df.drop_duplicates(subset="id")
-    df = df[SCHEDULE_COLUMNS.keys()].rename(columns=SCHEDULE_COLUMNS)
-    df = df.astype(SCHEDULE_DTYPES)  # type: ignore[arg-type]
-    df = df[df["game_type"] == "2"]
-    df = df.sort_values("id").reset_index(drop=True)
-    df[["winner_abbrev", "loser_abbrev"]] = df.apply(
-        lambda row: _get_winner_loser(row), axis=1, result_type="expand"
-    )
-    df[["winner_abbrev", "loser_abbrev"]] = df[
-        ["winner_abbrev", "loser_abbrev"]
-    ].astype(pd.StringDtype())
-
-    return df
+logger = logging.getLogger(__name__)
 
 
-def _get_winner_loser(row: pd.Series) -> tuple[str | None, str | None]:
+def _get_winner_loser(game: pd.Series) -> tuple[str | None, str | None]:
     """
     Calculate the winner and loser for completed games
 
     Args:
-        row: single row of game data
+        game: single game data
 
     Returns:
         Team abbreviations for the winner and loser
     """
-    if row["game_state"] not in COMPLETED_STATES:
-        return None, None
-    if row["home_team_score"] > row["away_team_score"]:
-        return row["home_team_abbrev"], row["away_team_abbrev"]
+    if game["game_state"] not in COMPLETED_STATES:
+        winner_abbrev = loser_abbrev = None
 
-    return row["away_team_abbrev"], row["home_team_abbrev"]
+    elif game["home_team_score"] > game["away_team_score"]:
+        winner_abbrev = game["home_team_abbrev"]
+        loser_abbrev = game["away_team_abbrev"]
+
+    else:
+        winner_abbrev = game["away_team_abbrev"]
+        loser_abbrev = game["home_team_abbrev"]
+
+    return winner_abbrev, loser_abbrev
+
+
+def _clean_schedule(raw_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean schedule data
+
+    Args:
+        raw_df: Schedule data to clean
+
+    Returns:
+        Cleaned schedule dataframe
+    """
+    logger.debug(f"Cleaning schedule data. Starting rows: {len(raw_df)}")
+
+    cleaned_df = raw_df.copy()
+
+    cleaned_df = cleaned_df.drop_duplicates(subset="id")
+    cleaned_df = cleaned_df[SCHEDULE_COLUMNS.keys()].rename(columns=SCHEDULE_COLUMNS)
+    cleaned_df = cleaned_df.astype(SCHEDULE_DTYPES)  # type: ignore[arg-type]
+    cleaned_df = cleaned_df[cleaned_df["game_type"] == "2"]
+
+    cleaned_df = cleaned_df.sort_values("id").reset_index(drop=True)
+
+    cleaned_df[["winner_abbrev", "loser_abbrev"]] = cleaned_df.apply(
+        lambda row: _get_winner_loser(row), axis=1, result_type="expand"
+    )
+    cleaned_df[["winner_abbrev", "loser_abbrev"]] = cleaned_df[
+        ["winner_abbrev", "loser_abbrev"]
+    ].astype(pd.StringDtype())
+
+    logger.debug(f"Finished cleaning schedule data. Cleaned rows: {len(cleaned_df)}")
+
+    return cleaned_df
 
 
 def transform_season_schedule(raw_schedule: list[dict[str, Any]]) -> pd.DataFrame:
@@ -125,10 +94,20 @@ def transform_season_schedule(raw_schedule: list[dict[str, Any]]) -> pd.DataFram
     Returns:
         Cleaned DataFrame with winner/loser columns
     """
-    df = pd.json_normalize(raw_schedule)
-    df = _clean_schedule(df)
+    logger.info("Running schedule transformation")
 
-    return df
+    if not raw_schedule:
+        logger.warning("raw_schedule is empty")
+        raise ValueError("raw_schedule is empty")
+
+    transformed_schedule = pd.json_normalize(raw_schedule)
+    transformed_schedule = _clean_schedule(transformed_schedule)
+
+    logger.info(
+        f"Finished running schedule transformation. Total games: {len(transformed_schedule)}"
+    )
+
+    return transformed_schedule
 
 
 def transform_game_data(raw_game: dict[str, Any]) -> pd.DataFrame:
@@ -141,14 +120,22 @@ def transform_game_data(raw_game: dict[str, Any]) -> pd.DataFrame:
     Returns:
         Cleaned and transformed dataframe of game data
     """
+    logger.info("Running game transformation")
+
+    if not raw_game:
+        logger.warning("raw_game is empty")
+        raise ValueError("raw_game is empty")
+
     game_data = pd.json_normalize(raw_game)
     game_data = game_data.reindex(columns=list(GAME_COLUMNS.keys())).rename(
         columns=GAME_COLUMNS
     )
-
     game_data = game_data.astype(GAME_DTYPES)  # type: ignore[arg-type]
+
     game_data["start_time"] = (
         game_data["start_time"].dt.tz_convert("America/Edmonton").dt.strftime("%H:%M")
     )
+
+    logger.info("Finished running game transformation")
 
     return game_data
