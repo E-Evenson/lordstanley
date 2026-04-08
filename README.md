@@ -80,7 +80,7 @@ Draft data lives in `reference_data/drafts/{season}.csv` with `team_abbrev` and 
 
 ## What's Next
 
-- **Logging and error handling** — structured logging throughout the pipeline and domain layers, with graceful handling of NHL API failures
-- **Tests** — unit tests for domain logic using in-memory fixtures; test data for future, live, and intermission game states is already in place
-- **Pandas / Polars comparison** — a parallel Polars implementation of the pipeline to demonstrate reasoned tool selection, not just familiarity with one library
-- **Documentation** — module-level docstrings are complete; inline comments for non-obvious logic remain
+- **Logging and error handling** - structured logging throughout the pipeline and domain layers, with graceful handling of NHL API failures
+- **BigQuery/dbt implementation** - for the learning experience
+- **Tests** - tests are very early stages. Some fixture data exists. Pipeline transform has partial coverage. Domain logic is untested
+- **Documentation** - module-level docstrings are complete; inline comments for non-obvious logic remain
