@@ -14,6 +14,9 @@ import plotly.express as px  # type: ignore[import-untyped]
 import plotly.graph_objects as go  # type: ignore[import-untyped]
 
 
+logger = logging.getLogger(__name__)
+
+
 FUTURE_GAME_COLUMNS = {
     "game_date": "Date",
     "start_time": "Time",
@@ -22,6 +25,7 @@ FUTURE_GAME_COLUMNS = {
     "home_team_abbrev": "Home Team",
     "home_owner": "Home Owner",
 }
+
 
 LIVE_GAME_COLUMNS = {
     "away_team_abbrev": "Away",
@@ -32,6 +36,14 @@ LIVE_GAME_COLUMNS = {
     "home_team_score": "Home Score",
     "period_descriptor": "Period",
     "clock_time_remaining": "Time Remaining",
+}
+
+
+TEAM_STATS_COLUMNS = {
+    "position": "Rank",
+    "team_abbrev": "Team",
+    "points": "Points",
+    "games_played": "Games Played",
 }
 
 
@@ -187,6 +199,37 @@ def format_cumulative_points_chart(
         },
     )
     return fig
+
+
+def format_team_stats(raw_team_stats: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    """
+    Formats teams stats for each owner for display
+
+    Args:
+        raw_team_stats: unformatted next game data
+
+    Returns:
+        Dict of owners with values being dfs of the stats of teams they own
+    """
+    logger.info("Formatting team stats per owner.")
+
+    all_team_stats = raw_team_stats.copy()
+
+    team_stats = {}
+
+    owners = all_team_stats["owner"].unique()
+    for owner in owners:
+        owner_team_stats = all_team_stats[all_team_stats["owner"] == owner]
+        owner_team_stats = owner_team_stats[TEAM_STATS_COLUMNS.keys()].rename(
+            columns=TEAM_STATS_COLUMNS
+        )
+        team_stats[owner] = owner_team_stats
+
+    team_stats = dict(sorted(team_stats.items()))
+
+    logger.info("Finished formatting team stats per owner")
+
+    return team_stats
 
 
 if __name__ == "__main__":
