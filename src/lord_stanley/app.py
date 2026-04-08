@@ -50,12 +50,19 @@ def index():
     chart = formatters.format_cumulative_points_chart(cumulative_owner_stats)
     chart_html = chart.to_html(full_html=False, include_plotlyjs="cdn")
 
+    raw_team_stats = display_data["team_stats"]
+    team_stats = formatters.format_team_stats(raw_team_stats)
+    team_stats_html = {}
+    for owner in team_stats:
+        team_stats_html[owner] = pd.DataFrame.to_html(team_stats[owner], index=False)
+
     return render_template(
         "index.html",
         standings_table=league_standings_html,
         next_game_table=next_game_html,
         is_live=is_live,
         chart=chart_html,
+        team_stats=team_stats_html,
     )
 
 
