@@ -11,7 +11,6 @@ import logging
 
 import pandas as pd
 import plotly.express as px  # type: ignore[import-untyped]
-import plotly.graph_objects as go  # type: ignore[import-untyped]
 
 
 logger = logging.getLogger(__name__)
@@ -47,7 +46,7 @@ TEAM_STATS_COLUMNS = {
 }
 
 
-def format_league_standings(league_standings: pd.DataFrame) -> pd.DataFrame:
+def format_league_standings(league_standings: pd.DataFrame) -> str:
     """
     Formats league standings and adds win % column
 
@@ -55,8 +54,9 @@ def format_league_standings(league_standings: pd.DataFrame) -> pd.DataFrame:
         league_standings: unformatted league stats and standings
 
     Returns:
-        Dataframe with league standings formatted for display
+        HTML for league standings table
     """
+    logger.info("Formatting league standings table.")
     formatted_league_standings = league_standings.copy()
     formatted_league_standings["win_percentage"] = formatted_league_standings[
         "win_percentage"
@@ -70,6 +70,12 @@ def format_league_standings(league_standings: pd.DataFrame) -> pd.DataFrame:
             "win_percentage": "Win %",
         }
     )
+
+    formatted_league_standings = pd.DataFrame.to_html(
+        formatted_league_standings, index=False
+    )
+
+    logger.info("Formatting complete, returning html")
 
     return formatted_league_standings
 
@@ -140,7 +146,7 @@ def _format_live_game(game_data: pd.DataFrame) -> pd.DataFrame:
 
 def format_next_game(
     next_game_raw: pd.DataFrame, next_game_state: str, draft: pd.DataFrame
-) -> tuple[pd.DataFrame, str]:
+) -> tuple[str, str]:
     """
     Formats next game data for display
 
@@ -150,32 +156,36 @@ def format_next_game(
         draft: draft data
 
     Returns:
-        Tuple with dataframe of next game data formatted for display, and string indicating
+        Tuple with HTML for next game table, and string indicating
         whether next game is live
     """
-
-    next_game = next_game_raw.copy()
-    next_game = _map_owners(next_game, draft)
+    logger.info("Formatting next game table.")
+    formatted_next_game = next_game_raw.copy()
+    formatted_next_game = _map_owners(formatted_next_game, draft)
 
     is_live = ""
     if next_game_state in [
         "FUT",
         "PRE",
     ]:
-        next_game = _format_future_game(next_game)
+        formatted_next_game = _format_future_game(formatted_next_game)
     elif next_game_state in [
         "LIVE",
         "CRIT",
     ]:
         is_live = "(LIVE)"
-        next_game = _format_live_game(next_game)
+        formatted_next_game = _format_live_game(formatted_next_game)
 
-    return next_game, is_live
+    formatted_next_game = pd.DataFrame.to_html(formatted_next_game, index=False)
+
+    logger.info("Formatting completed, returning HTML.")
+
+    return formatted_next_game, is_live
 
 
 def format_cumulative_points_chart(
     cumulative_owner_stats_raw: pd.DataFrame,
-) -> go.Figure:
+) -> str:
     """
     Creates chart of cumulative owner stats
 
@@ -183,10 +193,11 @@ def format_cumulative_points_chart(
         cumulative_owner_stats_raw: unformatted cumulative owner stats
 
     Returns:
-        Figure of cumulative owner stats chart
+        HTML for cumulative points chart
     """
+    logger.info("Formatting cumulative points chart.")
     cumulative_owner_stats = cumulative_owner_stats_raw.copy()
-    fig = px.line(
+    cumulative_points_chart = px.line(
         cumulative_owner_stats,
         x="game_date",
         y="owner_cumulative_wins",
@@ -198,10 +209,17 @@ def format_cumulative_points_chart(
             "owner": "Owner",
         },
     )
-    return fig
+
+    cumulative_points_chart = cumulative_points_chart.to_html(
+        full_html=False, include_plotlyjs="cdn"
+    )
+
+    logger.info("Formatting completed, returning HTML")
+
+    return cumulative_points_chart
 
 
-def format_team_stats(raw_team_stats: pd.DataFrame) -> dict[str, pd.DataFrame]:
+def format_team_stats(raw_team_stats: pd.DataFrame) -> dict[str, str]:
     """
     Formats teams stats for each owner for display
 
@@ -209,7 +227,7 @@ def format_team_stats(raw_team_stats: pd.DataFrame) -> dict[str, pd.DataFrame]:
         raw_team_stats: unformatted next game data
 
     Returns:
-        Dict of owners with values being dfs of the stats of teams they own
+        Dict of owners with values being HTML of the stats tables of the teams they own
     """
     logger.info("Formatting team stats per owner.")
 
@@ -226,6 +244,9 @@ def format_team_stats(raw_team_stats: pd.DataFrame) -> dict[str, pd.DataFrame]:
         team_stats[owner] = owner_team_stats
 
     team_stats = dict(sorted(team_stats.items()))
+
+    for owner in team_stats:
+        team_stats[owner] = pd.DataFrame.to_html(team_stats[owner], index=False)
 
     logger.info("Finished formatting team stats per owner")
 

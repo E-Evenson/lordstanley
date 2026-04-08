@@ -11,7 +11,6 @@ Responsibilities:
 import logging
 
 from flask import Flask, render_template
-import pandas as pd
 
 from lord_stanley.domain import orchestrate as domain_orchestrator
 from lord_stanley.web import formatters
@@ -28,8 +27,7 @@ def index():
     display_data = domain_orchestrator.run_league_calculations()
 
     raw_league_standings = display_data["league_standings"]
-    league_standings = formatters.format_league_standings(raw_league_standings)
-    league_standings_html = pd.DataFrame.to_html(league_standings, index=False)
+    league_standings_html = formatters.format_league_standings(raw_league_standings)
 
     next_game_state = display_data["next_game_state"]
     is_live = ""
@@ -37,31 +35,30 @@ def index():
         "FINAL",
         "OFF",
     ]:
-        next_game_html = f"Season complete. {league_standings['Owner'].iloc[0]} wins!"
+        next_game_html = (
+            f"Season complete. {raw_league_standings['owner'].iloc[0]} wins!"
+        )
     else:
         draft = display_data["draft"]
         raw_next_game = display_data["next_game"]
-        next_game, is_live = formatters.format_next_game(
+        next_game_html, is_live = formatters.format_next_game(
             raw_next_game, next_game_state, draft
         )
-        next_game_html = pd.DataFrame.to_html(next_game, index=False)
 
     cumulative_owner_stats = display_data["cumulative_owner_stats"]
-    chart = formatters.format_cumulative_points_chart(cumulative_owner_stats)
-    chart_html = chart.to_html(full_html=False, include_plotlyjs="cdn")
+    cumulative_points_chart_html = formatters.format_cumulative_points_chart(
+        cumulative_owner_stats
+    )
 
     raw_team_stats = display_data["team_stats"]
-    team_stats = formatters.format_team_stats(raw_team_stats)
-    team_stats_html = {}
-    for owner in team_stats:
-        team_stats_html[owner] = pd.DataFrame.to_html(team_stats[owner], index=False)
+    team_stats_html = formatters.format_team_stats(raw_team_stats)
 
     return render_template(
         "index.html",
         standings_table=league_standings_html,
         next_game_table=next_game_html,
         is_live=is_live,
-        chart=chart_html,
+        chart=cumulative_points_chart_html,
         team_stats=team_stats_html,
     )
 
