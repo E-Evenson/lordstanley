@@ -9,7 +9,7 @@
     <h1>Standings</h1>
     {{ standings_table | safe }}
 
-    <h1>Next Game{{ is_live }}</h1>
+    <h1>Next Game{% if is_live %} (LIVE){% endif %}</h1>
     {{ next_game_table | safe }}
 
     <h1>Team Stats by Owner</h1>

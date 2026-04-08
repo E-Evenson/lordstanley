@@ -5,7 +5,6 @@ Responsibilities:
     - Calling domain layer
     - Passing raw data to formatter layer
     - Next game display formatting
-    - Converting to html
 """
 
 import logging
@@ -30,7 +29,7 @@ def index():
     league_standings_html = formatters.format_league_standings(raw_league_standings)
 
     next_game_state = display_data["next_game_state"]
-    is_live = ""
+    is_live = next_game_state in ["LIVE", "CRIT"]
     if next_game_state in [
         "FINAL",
         "OFF",
@@ -41,7 +40,7 @@ def index():
     else:
         draft = display_data["draft"]
         raw_next_game = display_data["next_game"]
-        next_game_html, is_live = formatters.format_next_game(
+        next_game_html = formatters.format_next_game(
             raw_next_game, next_game_state, draft
         )
 

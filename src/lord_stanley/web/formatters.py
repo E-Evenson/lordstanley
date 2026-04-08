@@ -5,6 +5,7 @@ Responsibilities:
     - Formatting dataframes for display
     - Determining next game display state
     - Creating cumulative points chart
+    - Converting to HTML
 """
 
 import logging
@@ -146,7 +147,7 @@ def _format_live_game(game_data: pd.DataFrame) -> pd.DataFrame:
 
 def format_next_game(
     next_game_raw: pd.DataFrame, next_game_state: str, draft: pd.DataFrame
-) -> tuple[str, str]:
+) -> str:
     """
     Formats next game data for display
 
@@ -156,14 +157,12 @@ def format_next_game(
         draft: draft data
 
     Returns:
-        Tuple with HTML for next game table, and string indicating
-        whether next game is live
+        HTML for next game table
     """
     logger.info("Formatting next game table.")
     formatted_next_game = next_game_raw.copy()
     formatted_next_game = _map_owners(formatted_next_game, draft)
 
-    is_live = ""
     if next_game_state in [
         "FUT",
         "PRE",
@@ -173,14 +172,13 @@ def format_next_game(
         "LIVE",
         "CRIT",
     ]:
-        is_live = "(LIVE)"
         formatted_next_game = _format_live_game(formatted_next_game)
 
     formatted_next_game = pd.DataFrame.to_html(formatted_next_game, index=False)
 
     logger.info("Formatting completed, returning HTML.")
 
-    return formatted_next_game, is_live
+    return formatted_next_game
 
 
 def format_cumulative_points_chart(
