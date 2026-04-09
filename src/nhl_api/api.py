@@ -118,7 +118,7 @@ def fetch_game_data(game_id: str) -> dict[str, Any]:
 
 async def _fetch_single_team_schedule(
     session: aiohttp.ClientSession, team: str, season: str
-) -> list[dict[str, Any]]:
+) -> dict[str, Any]:
     """
     Fetch a full season schedule for a single team asynchronously
 
@@ -128,7 +128,7 @@ async def _fetch_single_team_schedule(
         season: Season id (e.g. 20242025)
 
     Returns:
-        A list of dicts, where each dict is a single game's data
+        A dict with a team's schedule data
 
     Raises:
         aiohttp.ClientResponseError: If the server returns an HTTP error status.
@@ -142,15 +142,12 @@ async def _fetch_single_team_schedule(
 
     team_schedule_data = await _async_fetch(session, url)
 
-    team_games_list = team_schedule_data.get("games")
-    # not all teams play in a season, remove teams with empty schedules
-    if not team_games_list:
-        logger.warning(f"No games found for {team} in {season}")
-        return []
+    if not team_schedule_data.get("games"):
+        logger.warning(f"No schedule data for {team} in {season} season")
 
-    logger.debug(f"Finished running fetch_team_schedule for {team} in {season} season")
+    logger.debug(f"Finished fetching team schedule for {team} in {season} season")
 
-    return team_games_list
+    return team_schedule_data
 
 
 async def fetch_team_schedules(
@@ -169,7 +166,7 @@ async def fetch_team_schedules(
         teams: Teams to fetch season schedules for.
 
     Returns:
-        A list of dicts, where each dict is a single game's data
+        A list of dicts, where each dict is a team's schedule data
 
     Raises:
         aiohttp.ClientResponseError: If the server returns an HTTP error status.
@@ -178,27 +175,19 @@ async def fetch_team_schedules(
 
     """
 
-    logger.info(f"Running fetch_team_schedules for {season}")
+    logger.info(f"Running fetch_team_schedules for {season}, for {len(teams)}")
 
     async with aiohttp.ClientSession() as session:
         team_schedules = await asyncio.gather(
             *(_fetch_single_team_schedule(session, team, season) for team in teams)
         )
 
-    schedules_extracted = 0
-    all_games = []
-    for team in team_schedules:
-        if team:
-            schedules_extracted += 1
-        all_games.extend(team)
+    logger.info(f"Finished running fetch_team_schedules for {season} season.")
 
-    logger.info(
-        f"Finished running fetch_team_schedules for {season}. {schedules_extracted} team's schedules returned"
-    )
-    return all_games
+    return team_schedules
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    teams = fetch_game_data("2023020416")
+    teams = asyncio.run(fetch_team_schedules("20232024", ["CGY"]))
     print(teams)
