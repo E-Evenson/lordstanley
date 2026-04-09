@@ -35,14 +35,14 @@ def _save_raw(schedule: list[dict[str, Any]], season: str) -> None:
 def extract_season_schedule(season: str, teams: list[str]) -> list[dict[str, Any]]:
     """
     Get the full season schedule for a list of teams for a given season
-    and persist to disk
+    and save to .json
 
     Args:
         season: The season code to get the schedule for
         teams: The list of teams to get the schedule for
 
     Returns:
-        A list of dicts, where each dict is a single game's data
+        A list of dicts, where each dict is a team's season schedule data
     """
 
     full_season_schedule = asyncio.run(fetch_team_schedules(season, teams))
@@ -53,7 +53,7 @@ def extract_season_schedule(season: str, teams: list[str]) -> list[dict[str, Any
 
 def extract_single_game(game_id: str) -> dict[str, Any]:
     """
-    Get the data for a given game. Raw data is not persisted to disk as it is fetched
+    Get the data for a given game. Raw data is not saved to disk as it is fetched
     fresh every time.
 
     Args:
@@ -69,10 +69,12 @@ def extract_single_game(game_id: str) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    import json
+    # import json
 
-    game_id = "2025021209"
-    raw_game = fetch_game_data(game_id)
+    # game_id = "2025021209"
+    # raw_game = fetch_game_data(game_id)
 
-    with open(f"tests/data/game/{game_id}.json", "w") as f:
-        json.dump(raw_game, f)
+    # with open(f"tests/data/game/{game_id}.json", "w") as f:
+    #     json.dump(raw_game, f)
+    schedules = extract_season_schedule("20242025", ["CGY"])
+    print(schedules)
