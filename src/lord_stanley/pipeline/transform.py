@@ -86,7 +86,7 @@ def _clean_schedule(raw_df: pd.DataFrame) -> pd.DataFrame:
     return cleaned_df
 
 
-def transform_season_schedule(raw_schedule: list[dict[str, Any]]) -> pd.DataFrame:
+def transform_season_schedule(raw_schedules: list[dict[str, Any]]) -> pd.DataFrame:
     """
     Transform raw schedule data into a cleaned DataFrame
 
@@ -98,11 +98,16 @@ def transform_season_schedule(raw_schedule: list[dict[str, Any]]) -> pd.DataFram
     """
     logger.info("Running schedule transformation")
 
-    if not raw_schedule:
+    if not raw_schedules:
         logger.warning("raw_schedule is empty")
         raise ValueError("raw_schedule is empty")
 
-    transformed_schedule = pd.json_normalize(raw_schedule)
+    all_games = []
+    for raw_team_schedule in raw_schedules:
+        games = raw_team_schedule.get("games", [])
+        all_games.extend(games)
+
+    transformed_schedule = pd.json_normalize(all_games)
     transformed_schedule = _clean_schedule(transformed_schedule)
 
     logger.info(
