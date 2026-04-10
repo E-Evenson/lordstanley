@@ -108,7 +108,8 @@ def calculate_cumulative_owner_stats(
     completed_cup_games_with_owners: pd.DataFrame, draft: pd.DataFrame
 ) -> pd.DataFrame:
     """
-    Calculates owner stats cumulatively over the course of the season
+    Calculates owner stats cumulatively over the course of the season, with a row for every owner
+    on every cup game date
 
     Args:
         completed_cup_games_with_owners: dataframe of all cup games with owner info
@@ -132,6 +133,14 @@ def calculate_cumulative_owner_stats(
         owners_cumulative_stats["result"] == "winner_owner"
     )
 
+    # collapse games where an owner plays against themselves into a single row. An owner having
+    # two rows on a single date causes display issues in the chart
+    owners_cumulative_stats = (
+        owners_cumulative_stats.groupby(["game_date", "owner"])
+        .sum()
+        .reset_index(drop=False)
+    )
+
     owners_cumulative_stats["owner_cumulative_wins"] = (
         owners_cumulative_stats["is_win"]
         .groupby(owners_cumulative_stats["owner"])
@@ -139,6 +148,7 @@ def calculate_cumulative_owner_stats(
         .astype(pd.Int64Dtype())
     )
 
+    # Retained for potential future use in cumulative games played chart
     owners_cumulative_stats["owner_cumulative_games_played"] = (
         owners_cumulative_stats.groupby("owner").cumcount() + 1
     ).astype(pd.Int64Dtype())
@@ -148,6 +158,7 @@ def calculate_cumulative_owner_stats(
         ["game_date"]
     ].drop_duplicates()
 
+    # cross join to create a row for every owner on every game date. This creates a cleaner chart
     full_game_grid = pd.merge(owners, all_cup_game_dates, how="cross").sort_values(
         "game_date"
     )
