@@ -1,9 +1,10 @@
 """
-Orchestration layer for the Lord Stanley ETL pipeline
+Orchestration layer for Lord Stanley pipelines. The local functions are for local ETL. The BigQuery
+functions are for ELT directly loading into BigQuery.
 
 Responsibilites:
     - Orchestrate extract, transform, and load layers
-    - Receive and pass arguments to ETL layers
+    - Receive and pass arguments to ETL/ELT layers
 """
 
 import logging
@@ -16,9 +17,9 @@ from lord_stanley.pipeline import extract, transform, load
 logger = logging.getLogger(__name__)
 
 
-def run_schedule_etl(season: str, teams: list[str]) -> pd.DataFrame:
+def run_local_schedule_etl(season: str, teams: list[str]) -> pd.DataFrame:
     """
-    Run ETL for the full season schedule for a given season and list of teams
+    Run local ETL for the full season schedule for a given season and list of teams
 
     Args:
         season: The season code to run the ETL for
@@ -40,9 +41,29 @@ def run_schedule_etl(season: str, teams: list[str]) -> pd.DataFrame:
     return transformed_schedule
 
 
-def run_game_etl(game_id: str) -> pd.DataFrame:
+def run_bigquery_schedule_elt(season: str, teams: list[str]) -> None:
     """
-    Run ETL for a single game
+    Run ELT for BigQuery for the full season schedule for a given season and list of teams
+
+    Args:
+        season: The season code to run the ETL for
+        teams: The teams to get schedules for
+
+    """
+    logger.info(f"Running BigQuery ELT for {len(teams)} for the {season} season.")
+
+    raw_schedule = extract.extract_season_schedule(season, teams)
+    load.load_to_bigquery(raw_schedule)
+    # TODO: trigger dbt transform
+
+    logger.info(
+        f"Finished running BigQuery ELT for {season} season. Schedules for {len(raw_schedule)} processed."
+    )
+
+
+def run_local_game_etl(game_id: str) -> pd.DataFrame:
+    """
+    Run local ETL for a single game
 
     Args:
         game_id: Game ID for the game to retrieve
@@ -63,4 +84,8 @@ def run_game_etl(game_id: str) -> pd.DataFrame:
 if __name__ == "__main__":
     from lord_stanley.domain.constants import ACTIVE_TEAM_TRICODES
 
-    run_schedule_etl("20252026", ACTIVE_TEAM_TRICODES)
+    logging.basicConfig(level="INFO")
+
+    run_bigquery_schedule_elt("20252026", ACTIVE_TEAM_TRICODES)
+
+    run_local_schedule_etl("20252026", ACTIVE_TEAM_TRICODES)
