@@ -23,6 +23,7 @@ Data flows in one direction: `nhl_api` → `pipeline` → `domain` → `web`. Th
 
 This structure means each layer can be reasoned about independently. The NHL API client knows nothing about cup possession. The domain layer knows nothing about Flask. Keeping those boundaries clean is the main architectural goal.
 
+To get the full schedule from the API, it's 
 ---
 
 ## Key Technical Decisions
@@ -84,3 +85,9 @@ Draft data lives in `reference_data/drafts/{season}.csv` with `team_abbrev` and 
 - **BigQuery/dbt implementation** - for the learning experience
 - **Tests** - tests are very early stages. Some fixture data exists. Pipeline transform has partial coverage. Domain logic is untested
 - **Documentation** - module-level docstrings are complete; inline comments for non-obvious logic remain
+
+---
+
+## Acknowledgements
+
+NHL API Endpoints documented by Drew Hynes: https://gitlab.com/dword4/nhlapi
