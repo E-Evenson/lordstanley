@@ -50,7 +50,7 @@ def run_bigquery_schedule_elt(season: str, teams: list[str]) -> None:
         teams: The teams to get schedules for
 
     """
-    logger.info(f"Running BigQuery ELT for {len(teams)} for the {season} season.")
+    logger.info(f"Running BigQuery ELT for {len(teams)} teams for the {season} season.")
 
     raw_schedule = extract.extract_season_schedule(season, teams)
     load.load_to_bigquery(raw_schedule)
