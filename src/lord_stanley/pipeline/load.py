@@ -18,6 +18,7 @@ from google.cloud import bigquery
 import pandas as pd
 
 from lord_stanley.config import PROCESSED_DIR
+from lord_stanley.storage.bigquery import load_raw
 
 
 logger = logging.getLogger(__name__)
@@ -47,11 +48,6 @@ def load_to_bigquery(raw_schedule: list[dict[str, Any]]) -> None:
 
     table_id = "lord-stanley.raw.schedule"
 
-    client = bigquery.Client()
-    job_config = bigquery.LoadJobConfig(
-        write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE, autodetect=True
-    )
-    job = client.load_table_from_json(raw_schedule, table_id, job_config=job_config)
-    job.result()
+    load_raw(raw_schedule, table_id)
 
     logger.info("Finished loading to BigQuery")
