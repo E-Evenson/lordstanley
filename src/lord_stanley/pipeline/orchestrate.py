@@ -57,7 +57,7 @@ def run_bigquery_schedule_elt(season: str, teams: list[str]) -> None:
     # TODO: trigger dbt transform
 
     logger.info(
-        f"Finished running BigQuery ELT for {season} season. Schedules for {len(raw_schedule)} processed."
+        f"Finished running BigQuery ELT for {season} season. Schedules for {len(raw_schedule)} teams processed."
     )
 
 
