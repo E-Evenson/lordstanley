@@ -14,8 +14,9 @@ The project is organized into four layers with a deliberate dependency direction
 src/
 ├── nhl_api/          # Standalone API client — raw JSON, no transformation
 └── lord_stanley/
-    ├── pipeline/     # Extract, transform, load, orchestrate
     ├── domain/       # Business logic: cup possession, owner assignment, stats
+    ├── pipeline/     # Extract, transform, load, orchestrate
+    ├── storage/      # Read and write across data storage backends
     └── web/          # Flask app, formatters, and templates
 ```
 
@@ -37,6 +38,8 @@ This structure means each layer can be reasoned about independently. The NHL API
 
 **Domain functions accept DataFrames, not file paths.** I/O belongs at the pipeline boundary. By the time data reaches the domain layer it's already loaded; domain functions receive DataFrames and return DataFrames. This keeps the separation between "getting data" and "doing something with data" clean and explicit.
 
+**dbt as a learning exercise.** The local python pipeline (pandas + parquet) is the production path for the live app. It's fast and simple, with no external dependencies. I'm building out a BigQuery/dbt version for the learning experience, working with a cloud warehouse, templated SQL for transformations and calculations, and a scheduled pipeline using Airflow or Dagster (TBD). The implementations are intentionally kept separate. The local version allows for quick live updates, the BigQuery/dbt version is designed for daily refreshes where latency doesn't matter. 
+
 ---
 
 ## The Rebuild
@@ -55,7 +58,8 @@ The original version was how I learned the domain. The rebuilt version is how I 
 |---|---|
 | Language | Python 3.13 (pyenv) |
 | Dependencies | Poetry |
-| Data processing | pandas |
+| Data processing | pandas, dbt |
+| Data warehouse | BigQuery |
 | Web framework | Flask |
 | Charting | Plotly |
 | Deployment | Railway |
@@ -81,6 +85,6 @@ Draft data lives in `reference_data/drafts/{season}.csv` with `team_abbrev` and 
 ## What's Next
 
 - **Logging and error handling** - structured logging throughout the pipeline and domain layers, with graceful handling of NHL API failures
-- **BigQuery/dbt implementation** - for the learning experience
+- **BigQuery/dbt implementation** - built extract and load for schedule data into BigQuery. Created dbt model for Transformation, but not yet integrated. Will set up Airflow/Dagster for dbt/BigQuery ELT pipeline orchestration.
 - **Tests** - tests are very early stages. Some fixture data exists. Pipeline transform has partial coverage. Domain logic is untested
 - **Documentation** - module-level docstrings are complete; inline comments for non-obvious logic remain
