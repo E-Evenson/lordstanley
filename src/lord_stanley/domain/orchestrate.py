@@ -46,7 +46,7 @@ def _get_next_game_data(cup_schedule: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     """
     next_cup_game = cup_schedule.tail(1)
     next_cup_game_id = next_cup_game["id"].item()
-    raw_next_game_data = pipeline.run_game_etl(next_cup_game_id)
+    raw_next_game_data = pipeline.run_local_game_etl(next_cup_game_id)
     next_game_state = raw_next_game_data["game_state"].item()
 
     return raw_next_game_data, next_game_state
@@ -78,7 +78,7 @@ def run_league_calculations() -> LeagueCalculationsResult:
     schedule_path = PROCESSED_DIR / f"{CURRENT_SEASON}_schedule.parquet"
     if not schedule_path.exists():
         logger.debug(f"No schedule data found for {CURRENT_SEASON} season")
-        schedule = pipeline.run_schedule_etl(CURRENT_SEASON, ACTIVE_TEAM_TRICODES)
+        schedule = pipeline.run_local_schedule_etl(CURRENT_SEASON, ACTIVE_TEAM_TRICODES)
     else:
         logger.debug(f"Reading schedule data for {CURRENT_SEASON} season")
         schedule = pd.read_parquet(schedule_path)
@@ -91,7 +91,7 @@ def run_league_calculations() -> LeagueCalculationsResult:
     next_game, next_game_state = _get_next_game_data(cup_schedule)
 
     if next_game_state in COMPLETED_GAME_STATES:
-        schedule = pipeline.run_schedule_etl(CURRENT_SEASON, ACTIVE_TEAM_TRICODES)
+        schedule = pipeline.run_local_schedule_etl(CURRENT_SEASON, ACTIVE_TEAM_TRICODES)
         cup_schedule = cup_possession.get_cup_games(schedule, CUP_HOLDER_START)
         next_game, next_game_state = _get_next_game_data(cup_schedule)
 
