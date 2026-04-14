@@ -11,8 +11,6 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-client = bigquery.Client()
-
 
 def load_raw(raw_data: list[dict[str, Any]], table_id: str) -> None:
     """
@@ -23,6 +21,8 @@ def load_raw(raw_data: list[dict[str, Any]], table_id: str) -> None:
         table_id: table to load raw data to
     """
     logger.info(f"Writing to BigQuery table: {table_id}")
+
+    client = bigquery.Client()
 
     job_config = bigquery.LoadJobConfig(
         write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE, autodetect=True
