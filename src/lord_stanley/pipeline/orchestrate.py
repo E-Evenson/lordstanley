@@ -11,7 +11,8 @@ import logging
 
 import pandas as pd
 
-from lord_stanley.pipeline import extract, transform, load
+from lord_stanley.pipeline import extract, load
+from lord_stanley.pipeline.transform import pandas
 
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ def run_local_schedule_etl(season: str, teams: list[str]) -> pd.DataFrame:
     logger.info(f"Running schedule ETL for {len(teams)} for the {season} season.")
 
     raw_schedule = extract.extract_season_schedule(season, teams)
-    transformed_schedule = transform.transform_season_schedule(raw_schedule)
+    transformed_schedule = pandas.transform_season_schedule(raw_schedule)
     load.save_schedule(transformed_schedule, season)
 
     logger.info(
@@ -74,7 +75,7 @@ def run_local_game_etl(game_id: str) -> pd.DataFrame:
     logger.info(f"Running ETL for game: {game_id}.")
 
     raw_game = extract.extract_single_game(game_id)
-    transformed_game = transform.transform_game_data(raw_game)
+    transformed_game = pandas.transform_game_data(raw_game)
 
     logger.info("Finished running game ETL")
 

@@ -10,6 +10,7 @@ __pycache__/
 .venv/
 .env
 .env.*
+!.env.example
 
 # Config
 config/
@@ -34,6 +35,11 @@ dist/
 build/
 *.egg-info/**/.DS_Store
 .DS_Store
+
+# Dagster
+.dagster/
+.tmp_dagster_home*/
+dagster_home/
 
 # Other
 scripts/

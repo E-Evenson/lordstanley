@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from lord_stanley.pipeline.transform import (
+from lord_stanley.pipeline.transform.pandas import (
     transform_season_schedule,
     transform_game_data,
 )

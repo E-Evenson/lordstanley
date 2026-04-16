@@ -253,13 +253,13 @@ def format_team_stats(raw_team_stats: pd.DataFrame) -> dict[str, str]:
 
 if __name__ == "__main__":
     import json
-    from lord_stanley.pipeline import transform
+    from lord_stanley.pipeline.transform import pandas
 
     draft = pd.read_csv("reference_data/drafts/20252026.csv")
 
     with open("tests/data/future_game.json", "r") as file:
         future_game_raw = json.load(file)
-    future_game_data = transform.transform_game_data(future_game_raw)
+    future_game_data = pandas.transform_game_data(future_game_raw)
 
     future_game, is_live_future = format_next_game(future_game_data, "FUT", draft)
     print(future_game, is_live_future)
@@ -267,6 +267,6 @@ if __name__ == "__main__":
     with open("tests/data/live_game.json", "r") as file:
         live_game_raw = json.load(file)
 
-    live_game_data = transform.transform_game_data(live_game_raw)
+    live_game_data = pandas.transform_game_data(live_game_raw)
     game_data_live, is_live_live = format_next_game(live_game_data, "LIVE", draft)
     print(game_data_live, is_live_live)
