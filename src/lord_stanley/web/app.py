@@ -24,6 +24,7 @@ def index():
     """
     Render the Lord Stanley league standings and next cup game page.
     """
+    logger.info(f"Pipeline run method: {PIPELINE_RUN_METHOD}")
     if PIPELINE_RUN_METHOD == "scheduled":
         display_data = domain_orchestrator.run_league_calculations_sql()
     else:
