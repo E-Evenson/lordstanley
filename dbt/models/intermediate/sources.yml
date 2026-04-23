@@ -29,6 +29,10 @@ sources:
           data_tests:
             - not_null
             - unique
+        - name: start_time
+          description: "Start time of the game in UTC"
+          data_tests:
+            - not_null
         - name: game_state
           description: "State of the game"
           data_tests:
