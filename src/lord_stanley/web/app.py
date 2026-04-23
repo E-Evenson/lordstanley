@@ -11,6 +11,7 @@ import logging
 
 from flask import Flask, render_template
 
+from lord_stanley.config import PIPELINE_RUN_METHOD
 from lord_stanley.domain import orchestrate as domain_orchestrator
 from lord_stanley.web import formatters
 
@@ -23,7 +24,10 @@ def index():
     """
     Render the Lord Stanley league standings and next cup game page.
     """
-    display_data = domain_orchestrator.run_league_calculations()
+    if PIPELINE_RUN_METHOD == "scheduled":
+        display_data = domain_orchestrator.run_league_calculations_sql()
+    else:
+        display_data = domain_orchestrator.run_live_league_calculations()
 
     raw_league_standings = display_data["league_standings"]
     league_standings_html = formatters.format_league_standings(raw_league_standings)

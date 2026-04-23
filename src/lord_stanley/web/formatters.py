@@ -62,7 +62,7 @@ def format_league_standings(league_standings: pd.DataFrame) -> str:
     formatted_league_standings["win_percentage"] = formatted_league_standings[
         "win_percentage"
     ].apply(lambda x: f"{x}%")
-    formatted_league_standings = formatted_league_standings.reset_index().rename(
+    formatted_league_standings = formatted_league_standings.rename(
         columns={
             "position": "Position",
             "owner": "Owner",

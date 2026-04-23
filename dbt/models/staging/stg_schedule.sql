@@ -3,6 +3,7 @@ SELECT DISTINCT
     game.id AS id,
     game.gameType AS game_type,
     game.gameDate AS game_date,
+    game.startTimeUTC AS start_time,
     game.gameState AS game_state,
     game.awayTeam.abbrev AS away_team_abbrev,
     game.awayTeam.score AS away_team_score,

@@ -2,6 +2,8 @@
 Orchestration for Lord Stanley assets
 """
 
+from importlib.resources import files
+
 import dagster as dg
 
 from lord_stanley.config import CURRENT_SEASON, CUP_HOLDER_START
@@ -10,7 +12,7 @@ from lord_stanley.pipeline.extract import extract_season_schedule
 from lord_stanley.pipeline.load import load_to_bigquery
 from lord_stanley.pipeline.transform.dbt import run_stg_schedule
 
-from lord_stanley.storage.bigquery import read_table, load_df
+from lord_stanley.storage.bigquery import query, load_df
 
 from lord_stanley.domain.constants import ACTIVE_TEAM_TRICODES
 from lord_stanley.domain.cup_possession import get_cup_games
@@ -39,7 +41,10 @@ def cup_possession() -> None:
     """
     Run the cup possession logic in Python
     """
-    schedule = read_table("lord-stanley.staging.stg_schedule")
+    sql = (
+        files("dagster_orchestration.sql").joinpath("read_stg_schedule.sql").read_text()
+    )
+    schedule = query(sql)
     cup_games = get_cup_games(schedule, CUP_HOLDER_START)
     load_df(cup_games, "lord-stanley.intermediate.int_cup_possession")
 

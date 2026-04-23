@@ -57,6 +57,7 @@ def calculate_league_standings(
 
     standings.index = pd.RangeIndex(start=1, stop=len(standings) + 1)
     standings.index.name = "position"
+    standings = standings.reset_index()
 
     return standings
 

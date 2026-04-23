@@ -2,6 +2,7 @@
 Configuration settings for Lord Stanley
 """
 
+import os
 from pathlib import Path
 
 
@@ -15,3 +16,6 @@ REFERENCE_DATA_DIR = ROOT_DIR / "reference_data"
 # Season
 CURRENT_SEASON = "20252026"
 CUP_HOLDER_START = "FLA"
+
+# Pipeline run method switch "live" or "scheduled"
+PIPELINE_RUN_METHOD = os.getenv("PIPELINE_RUN_METHOD", "live")

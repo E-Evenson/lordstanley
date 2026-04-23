@@ -11,6 +11,7 @@ Responsibilities:
     - Applying domain calculations in the correct order
 """
 
+from importlib.resources import files
 import logging
 from typing import TypedDict
 
@@ -29,6 +30,7 @@ from lord_stanley.domain import (
     assign_owners,
     stats_calculator,
 )
+from lord_stanley.storage.bigquery import query
 
 
 logger = logging.getLogger(__name__)
@@ -65,7 +67,7 @@ class LeagueCalculationsResult(TypedDict):
     draft: pd.DataFrame
 
 
-def run_league_calculations() -> LeagueCalculationsResult:
+def run_live_league_calculations() -> LeagueCalculationsResult:
     """
     Orchestrate all domain logic and calculations for Lord Stanley
 
@@ -124,7 +126,52 @@ def run_league_calculations() -> LeagueCalculationsResult:
     return display_data
 
 
-if __name__ == "__main__":
-    display_data = run_league_calculations()
-    print(display_data["league_standings"])
-    print(display_data["next_game"])
+def run_league_calculations_sql() -> LeagueCalculationsResult:
+    """
+    Run SQL queries on data marts
+
+    Returns:
+        Typed dict containing league calculations
+    """
+    logger.info("Fetching league data from SQL data marts")
+
+    league_standings_query = (
+        files("lord_stanley.domain.sql").joinpath("league_standings.sql").read_text()
+    )
+    league_standings_query = league_standings_query.format(season=CURRENT_SEASON)
+    league_standings = query(league_standings_query)
+
+    team_stats_query = (
+        files("lord_stanley.domain.sql").joinpath("team_stats.sql").read_text()
+    )
+    team_stats_query = team_stats_query.format(season=CURRENT_SEASON)
+    team_stats = query(team_stats_query)
+
+    cumulative_stats_query = (
+        files("lord_stanley.domain.sql").joinpath("cumulative_points.sql").read_text()
+    )
+    cumulative_stats_query = cumulative_stats_query.format(season=CURRENT_SEASON)
+    cumulative_owner_stats = query(cumulative_stats_query)
+
+    next_game_query = (
+        files("lord_stanley.domain.sql").joinpath("next_game.sql").read_text()
+    )
+    next_game_query = next_game_query.format(season=CURRENT_SEASON)
+    next_game = query(next_game_query)
+    next_game_state = next_game["game_state"].iloc[0]
+
+    draft_path = REFERENCE_DATA_DIR / f"drafts/{CURRENT_SEASON}.csv"
+    draft = pd.read_csv(draft_path)
+
+    display_data: LeagueCalculationsResult = {
+        "league_standings": league_standings,
+        "team_stats": team_stats,
+        "cumulative_owner_stats": cumulative_owner_stats,
+        "next_game": next_game,
+        "next_game_state": next_game_state,
+        "draft": draft,
+    }
+
+    logger.info("Finished fetchin league data")
+
+    return display_data
