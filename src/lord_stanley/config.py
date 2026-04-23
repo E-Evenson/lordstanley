@@ -2,9 +2,11 @@
 Configuration settings for Lord Stanley
 """
 
+from dotenv import load_dotenv
 import os
 from pathlib import Path
 
+load_dotenv()
 
 # Directories
 ROOT_DIR = Path(__file__).parent.parent.parent  # repo root
