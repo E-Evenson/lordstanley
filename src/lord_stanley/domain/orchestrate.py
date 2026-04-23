@@ -96,7 +96,9 @@ def run_league_calculations() -> LeagueCalculationsResult:
         next_game, next_game_state = _get_next_game_data(cup_schedule)
 
     owners_assigned = assign_owners.assign_owners(cup_schedule, draft)
-    completed_cup_games_with_owners = owners_assigned.head(-1)
+    completed_cup_games_with_owners = owners_assigned[
+        owners_assigned["winner_abbrev"].notna()
+    ]
 
     league_standings = stats_calculator.calculate_league_standings(
         completed_cup_games_with_owners, draft
