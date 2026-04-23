@@ -1,5 +1,5 @@
 """
-Run NHL pipeline dbt models
+Run NHL pipeline transformation dbt models
 """
 
 import subprocess

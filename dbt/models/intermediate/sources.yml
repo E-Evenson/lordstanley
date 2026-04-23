@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: intermediate
+    database: lord-stanley
+    schema: intermediate
+    tables:
+      - name: int_cup_possession
