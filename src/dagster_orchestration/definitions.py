@@ -1,3 +1,7 @@
+"""
+Dagster definitions for Lord Stanley orchestration
+"""
+
 from dagster import Definitions
 
 from dagster_orchestration.defs.assets import (
