@@ -139,13 +139,6 @@ def transform_game_data(raw_game: dict[str, Any]) -> pd.DataFrame:
     )
     game_data = game_data.astype(GAME_DTYPES)  # type: ignore[arg-type]
 
-    game_data["start_time"] = (
-        game_data["start_time"]
-        .dt.tz_convert("America/Edmonton")
-        .dt.strftime("%H:%M")
-        .astype(pd.StringDtype())
-    )
-
     logger.info("Finished running game transformation")
 
     return game_data

@@ -113,6 +113,13 @@ def _format_future_game(game_data: pd.DataFrame) -> pd.DataFrame:
     """
     future_game = game_data.copy()
     future_game["game_date"] = future_game["game_date"].dt.strftime("%B %e, %Y")
+    future_game["start_time"] = (
+        future_game["start_time"]
+        .dt.tz_convert("America/Edmonton")
+        .dt.strftime("%H:%M")
+        .astype(pd.StringDtype())
+    )
+
     future_game = future_game[FUTURE_GAME_COLUMNS.keys()].rename(
         columns=FUTURE_GAME_COLUMNS
     )

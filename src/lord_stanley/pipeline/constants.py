@@ -85,5 +85,4 @@ GAME_OUTPUT_COLUMNS = [*GAME_DTYPES.keys()]
 
 GAME_OUTPUT_DTYPES = {
     **GAME_DTYPES,
-    "start_time": pd.StringDtype(),
 }
