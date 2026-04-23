@@ -23,15 +23,29 @@ def _init_client() -> bigquery.Client:
 
     # Check if creds_raw is JSON
     if creds_raw and creds_raw.startswith("{"):
+        logger.info("Initializing BigQuery client with JSON credentials")
         info = json.loads(creds_raw)
         creds = service_account.Credentials.from_service_account_info(info)
         return bigquery.Client(credentials=creds, project=info["project_id"])
 
     # If creds_raw is filepath
+    logger.info("Initializing BigQuery with filepath credentials")
     return bigquery.Client()
 
 
-client = _init_client()
+# Lazily initialized to avoid credential errors on import
+_client = None
+
+
+def _get_client() -> bigquery.Client:
+    """
+    Return BigQuery client, initializing it on first call
+    """
+    global _client
+    if _client is None:
+        _client = _init_client()
+
+    return _client
 
 
 def load_json(raw_data: list[dict[str, Any]], table_id: str) -> None:
@@ -47,7 +61,7 @@ def load_json(raw_data: list[dict[str, Any]], table_id: str) -> None:
     job_config = bigquery.LoadJobConfig(
         write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE, autodetect=True
     )
-    job = client.load_table_from_json(raw_data, table_id, job_config=job_config)
+    job = _get_client().load_table_from_json(raw_data, table_id, job_config=job_config)
     job.result()
 
     logger.info(f"Finished writing {len(raw_data)} rows to BigQuery")
@@ -66,7 +80,7 @@ def load_df(df: pd.DataFrame, table_id: str) -> None:
     job_config = bigquery.LoadJobConfig(
         write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE, autodetect=True
     )
-    job = client.load_table_from_dataframe(df, table_id, job_config=job_config)
+    job = _get_client().load_table_from_dataframe(df, table_id, job_config=job_config)
     job.result()
 
     logger.info(f"Finished writing {len(df)} rows to BigQuery")
@@ -84,7 +98,7 @@ def query(sql: str) -> pd.DataFrame:
     """
     logger.info("Querying data from BigQuery")
 
-    data = client.query(sql).to_dataframe()
+    data = _get_client().query(sql).to_dataframe()
 
     logger.info(f"Read data from BigQuery. Rows returned: {len(data)}")
 
