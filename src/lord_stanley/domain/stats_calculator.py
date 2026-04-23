@@ -142,7 +142,7 @@ def calculate_cumulative_owner_stats(
         .reset_index(drop=False)
     )
 
-    owners_cumulative_stats["owner_cumulative_wins"] = (
+    owners_cumulative_stats["cumulative_points"] = (
         owners_cumulative_stats["is_win"]
         .groupby(owners_cumulative_stats["owner"])
         .cumsum()
@@ -171,10 +171,10 @@ def calculate_cumulative_owner_stats(
         on=["game_date", "owner"],
     )
 
-    owners_cumulative_stats[
-        ["owner_cumulative_wins", "owner_cumulative_games_played"]
-    ] = owners_cumulative_stats.groupby("owner")[
-        ["owner_cumulative_wins", "owner_cumulative_games_played"]
-    ].transform(lambda x: x.ffill().fillna(0))
+    owners_cumulative_stats[["cumulative_points", "owner_cumulative_games_played"]] = (
+        owners_cumulative_stats.groupby("owner")[
+            ["cumulative_points", "owner_cumulative_games_played"]
+        ].transform(lambda x: x.ffill().fillna(0))
+    )
 
     return owners_cumulative_stats

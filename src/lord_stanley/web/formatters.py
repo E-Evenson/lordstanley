@@ -205,12 +205,12 @@ def format_cumulative_points_chart(
     cumulative_points_chart = px.line(
         cumulative_owner_stats,
         x="game_date",
-        y="owner_cumulative_wins",
+        y="cumulative_points",
         color="owner",
         title="Points Over Time",
         labels={
             "game_date": "Date",
-            "owner_cumulative_wins": "Points",
+            "cumulative_points": "Points",
             "owner": "Owner",
         },
     )
