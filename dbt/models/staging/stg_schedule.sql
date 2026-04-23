@@ -1,7 +1,7 @@
 SELECT DISTINCT
-    schedule.currentSeason AS season,
-    game.id AS id,
-    game.gameType AS game_type,
+    CAST(schedule.currentSeason AS STRING) AS season,
+    CAST(game.id AS STRING) AS id,
+    CAST(game.gameType AS STRING) AS game_type,
     game.gameDate AS game_date,
     game.startTimeUTC AS start_time,
     game.gameState AS game_state,
@@ -22,4 +22,4 @@ SELECT DISTINCT
 FROM {{ source('raw', 'schedule') }} AS schedule
 CROSS JOIN UNNEST(schedule.games) as game -- Use CROSS JOIN for clarity
 WHERE game.gameType = 2
-ORDER BY game.id ASC
+ORDER BY id ASC

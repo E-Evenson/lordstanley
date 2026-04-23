@@ -5,4 +5,58 @@ sources:
     database: lord-stanley
     schema: intermediate
     tables:
-      - name: int_cup_possession
+    - name: int_cup_possession
+      description: "Table of games calculated to be cup games"
+      columns:
+        - name: season
+          description: "NHL season ID"
+          data_tests:
+            - not_null
+        - name: id
+          description: "NHL game ID"
+          data_tests:
+            - not_null
+            - unique
+        - name: game_type
+          description: "NHL game type (pre-season, regular season, playoff)"
+          data_tests:
+            - not_null
+            - accepted_values:
+                arguments:
+                  values: ['2']
+        - name: game_date
+          description: "Date of the game"
+          data_tests:
+            - not_null
+            - unique
+        - name: game_state
+          description: "State of the game"
+          data_tests:
+            - not_null
+            - accepted_values:
+                arguments:
+                  values: ['FUT', 'PRE', 'LIVE', 'CRIT', 'FINAL', 'OFF']
+        - name: away_team_abbrev
+          description: "Tricode of the away team"
+          data_tests:
+            - not_null
+        - name: away_team_score
+          description: "Score of the away team"
+        - name: home_team_abbrev
+          description: "Tricode of the home team"
+          data_tests:
+            - not_null
+        - name: home_team_score
+          description: "Score of the home team"
+        - name: winner_abbrev
+          description: "Tricode of the winning team"
+        - name: loser_abbrev
+          description: "Tricode of the losing team"
+        - name: is_cup_game
+          description: "Flag designating whether a game is a cup game"
+          data_tests:
+          - accepted_values:
+              arguments: 
+                values: [true]
+                quote: false
+

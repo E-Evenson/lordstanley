@@ -23,7 +23,7 @@ game_grid AS (
     LEFT JOIN owners
         ON all_game_dates.season = owners.season
 )
-SELECT game_grid.season, game_grid.game_date, game_grid.owner, COALESCE(LAST_VALUE(cumulative_points.points IGNORE NULLS) OVER (PARTITION BY game_grid.season, game_grid.owner ORDER BY game_grid.game_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0) AS owner_cumulative_wins
+SELECT game_grid.season, game_grid.game_date, game_grid.owner, COALESCE(LAST_VALUE(cumulative_points.points IGNORE NULLS) OVER (PARTITION BY game_grid.season, game_grid.owner ORDER BY game_grid.game_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0) AS cumulative_points
 FROM game_grid
 LEFT JOIN cumulative_points
 ON game_grid.season = cumulative_points.season

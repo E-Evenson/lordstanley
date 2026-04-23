@@ -1,0 +1,105 @@
+models:
+  - name: fct_cumulative_points
+    description: "Cumulative points by date for each owner for each season"
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - season
+              - game_date
+              - owner
+    columns:
+      - name: season
+        description: "NHL season ID"
+        data_tests:
+          - not_null
+      - name: game_date
+        description: "Date of the game"
+        data_tests:
+          - not_null
+      - name: owner
+        description: "Owner name"
+        data_tests:
+          - not_null
+      - name: cumulative_points
+        description: "How many points an owner has accumulated up to a given date in a season"
+        data_tests:
+          - not_null
+  - name: fct_league_standings
+    description: "League stats and standings for each owner for each season"
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - season
+              - owner
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - season
+              - position
+    columns:
+      - name: season
+        description: "NHL season ID"
+        data_tests:
+          - not_null
+      - name: position
+        description: "Owner's rank per season"
+        data_tests:
+          - not_null
+      - name: owner
+        description: "Owner name"
+        data_tests:
+          - not_null
+      - name: points
+        description: "How many points an owner has in a season"
+        data_tests:
+          - not_null
+      - name: games_played
+        description: "How many games an owner has played in a season"
+        data_tests:
+          - not_null
+      - name: win_percentage
+        description: "Owner's win percentage"
+        data_tests:
+          - not_null
+  - name: fct_team_stats
+    description: "Stats for each individual team in a season with owner included"
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - season
+              - owner
+              - position
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - season
+              - team_abbrev
+              - owner
+    columns:
+      - name: season
+        description: "NHL season ID"
+        data_tests:
+          - not_null
+      - name: position
+        description: "Team's rank per owner per season"
+        data_tests:
+          - not_null
+      - name: team_abbrev
+        description: "Team name abbreviation"
+        data_tests:
+          - not_null
+      - name: points
+        description: "How many points the team has in a season"
+        data_tests:
+          - not_null
+      - name: games_played
+        description: "How many games games played the team has in a season"
+        data_tests:
+          - not_null
+      - name: owner
+        description: "Owner name"
+        data_tests:
+          - not_null

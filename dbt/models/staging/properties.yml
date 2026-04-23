@@ -17,8 +17,7 @@ models:
           - not_null
           - accepted_values:
               arguments:
-                values: [2]
-                quote: false
+                values: ['2']
       - name: game_date
         description: "Date of the game"
         data_tests:
