@@ -13,6 +13,9 @@ import logging
 import pandas as pd
 
 
+logger = logging.getLogger(__name__)
+
+
 def assign_owners(schedule: pd.DataFrame, draft: pd.DataFrame) -> pd.DataFrame:
     """
     Map fantasy owners to schedule data
@@ -24,6 +27,8 @@ def assign_owners(schedule: pd.DataFrame, draft: pd.DataFrame) -> pd.DataFrame:
     Returns:
         Schedule DataFrame with home owner, away owner, winner owner, and loser owner
     """
+
+    logger.debug("Assigning owners to schedule")
 
     owner_map = draft.set_index("team_abbrev")["owner"]
 

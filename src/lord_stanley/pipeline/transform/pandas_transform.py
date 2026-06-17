@@ -99,7 +99,7 @@ def transform_season_schedule(raw_schedules: list[dict[str, Any]]) -> pd.DataFra
     logger.info("Running schedule transformation")
 
     if not raw_schedules:
-        logger.warning("raw_schedule is empty")
+        logger.error("raw_schedule is empty")
         raise ValueError("raw_schedule is empty")
 
     all_games = []
@@ -130,7 +130,7 @@ def transform_game_data(raw_game: dict[str, Any]) -> pd.DataFrame:
     logger.info("Running game transformation")
 
     if not raw_game:
-        logger.warning("raw_game is empty")
+        logger.error("raw_game is empty")
         raise ValueError("raw_game is empty")
 
     game_data = pd.json_normalize(raw_game)

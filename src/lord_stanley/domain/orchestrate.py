@@ -172,6 +172,6 @@ def run_league_calculations_sql() -> LeagueCalculationsResult:
         "draft": draft,
     }
 
-    logger.info("Finished fetchin league data")
+    logger.info("Finished fetching league data")
 
     return display_data

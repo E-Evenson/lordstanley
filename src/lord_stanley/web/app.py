@@ -14,8 +14,11 @@ from flask import Flask, render_template
 from lord_stanley.config import PIPELINE_RUN_METHOD
 from lord_stanley.domain import orchestrate as domain_orchestrator
 from lord_stanley.web import formatters
+from lord_stanley.logging_config import configure_logging
 
 logger = logging.getLogger(__name__)
+configure_logging()
+
 app = Flask(__name__)
 
 

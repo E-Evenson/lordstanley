@@ -47,14 +47,29 @@ def _sync_fetch(url: str) -> dict[str, Any]:
         ValueError: If the response is valid JSON but not a dictionary.
     """
 
-    response = requests.get(url, timeout=_DEFAULT_TIMEOUT)
-    response.raise_for_status()
+    try:
+        response = requests.get(url, timeout=_DEFAULT_TIMEOUT)
 
-    data = response.json()
-    if not isinstance(data, dict):
-        raise ValueError(f"Expected JSON object from {url}, got {type(data).__name__}")
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            logger.error(f"Server response error for {url}: {e}")
+            raise
 
-    return data
+        data = response.json()
+        if not isinstance(data, dict):
+            msg = f"Expected JSON object from {url}, got {type(data).__name__}"
+            logger.error(msg)
+            raise ValueError(msg)
+
+        return data
+
+    except requests.exceptions.Timeout as e:
+        logger.error(f"Connection timed out for {url}: {e}")
+        raise
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Connection error for {url}: {e}")
+        raise
 
 
 async def _async_fetch(session: aiohttp.ClientSession, url: str) -> dict[str, Any]:
@@ -70,23 +85,36 @@ async def _async_fetch(session: aiohttp.ClientSession, url: str) -> dict[str, An
 
     Raises:
         aiohttp.ClientResponseError: If the server returns an HTTP error status.
-        aiohttp.ClientError: If a connection or timeout error occurs.
+        aiohttp.ServerTimeoutError: If a timeout error occurs.
+        aiohttp.ClientError: If other connection errors occurs.
         ValueError: If the response is valid JSON but not a dictionary.
     """
 
-    async with session.get(
-        url, timeout=aiohttp.ClientTimeout(total=_DEFAULT_TIMEOUT)
-    ) as response:
-        response.raise_for_status()
+    try:
+        async with session.get(
+            url, timeout=aiohttp.ClientTimeout(total=_DEFAULT_TIMEOUT)
+        ) as response:
+            try:
+                response.raise_for_status()
+            except aiohttp.ClientResponseError as e:
+                logger.error(f"Server response error for {url}: {e}")
+                raise
 
-        data = await response.json()
+            data = await response.json()
 
-        if not isinstance(data, dict):
-            raise ValueError(
-                f"Expected JSON object from {url}, got {type(data).__name__}"
-            )
+            if not isinstance(data, dict):
+                msg = f"Expected JSON object from {url}, got {type(data).__name__}"
+                logger.error(msg)
+                raise ValueError(msg)
 
-        return data
+            return data
+
+    except aiohttp.ServerTimeoutError as e:
+        logger.error(f"Connection timed out for {url}: {e}")
+        raise
+    except aiohttp.ClientError as e:
+        logger.error(f"Connection error for {url}: {e}")
+        raise
 
 
 def fetch_game_data(game_id: str) -> dict[str, Any]:
@@ -132,7 +160,8 @@ async def _fetch_single_team_schedule(
 
     Raises:
         aiohttp.ClientResponseError: If the server returns an HTTP error status.
-        aiohttp.ClientError: If a connection or timeout error occurs.
+        aiohttp.ServerTimeoutError: If a timeout error occurs.
+        aiohttp.ClientError: If other connection errors occurs.
         ValueError: If the response is valid JSON but not a dictionary.
     """
 
@@ -170,12 +199,12 @@ async def fetch_team_schedules(
 
     Raises:
         aiohttp.ClientResponseError: If the server returns an HTTP error status.
-        aiohttp.ClientError: If a connection or timeout error occurs.
+        aiohttp.ServerTimeoutError: If a timeout error occurs.
+        aiohttp.ClientError: If other connection errors occurs.
         ValueError: If the response is valid JSON but not a dictionary.
-
     """
 
-    logger.info(f"Running fetch_team_schedules for {season}, for {len(teams)}")
+    logger.info(f"Running fetch_team_schedules for {season}, for {len(teams)} teams")
 
     async with aiohttp.ClientSession() as session:
         team_schedules = await asyncio.gather(
@@ -185,9 +214,3 @@ async def fetch_team_schedules(
     logger.info(f"Finished running fetch_team_schedules for {season} season.")
 
     return team_schedules
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    teams = asyncio.run(fetch_team_schedules("20232024", ["CGY"]))
-    print(teams)

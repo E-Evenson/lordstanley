@@ -9,7 +9,12 @@ Not responsible for:
     - which fantasy owners are involved
 """
 
+import logging
+
 import pandas as pd
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_cup_games(
@@ -26,6 +31,8 @@ def get_cup_games(
     Returns:
         Schedule DataFrame with is_cup_game column added
     """
+
+    logger.debug(f"Calculating cup games. Starting team: {cup_holder_start}")
     df = schedule.copy()
     df["is_cup_game"] = False
     cup_holder = cup_holder_start
@@ -38,4 +45,7 @@ def get_cup_games(
             cup_holder = game["winner_abbrev"]
 
     df = df[df["is_cup_game"]]
+
+    logger.debug(f"Found {len(df)} cup games.")
+
     return df

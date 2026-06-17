@@ -57,7 +57,9 @@ def format_league_standings(league_standings: pd.DataFrame) -> str:
     Returns:
         HTML for league standings table
     """
-    logger.info("Formatting league standings table.")
+
+    logger.debug("Formatting league standings table.")
+
     formatted_league_standings = league_standings.copy()
     formatted_league_standings["win_percentage"] = formatted_league_standings[
         "win_percentage"
@@ -72,13 +74,9 @@ def format_league_standings(league_standings: pd.DataFrame) -> str:
         }
     )
 
-    formatted_league_standings = pd.DataFrame.to_html(
-        formatted_league_standings, index=False
-    )
+    standings_html = pd.DataFrame.to_html(formatted_league_standings, index=False)
 
-    logger.info("Formatting complete, returning html")
-
-    return formatted_league_standings
+    return standings_html
 
 
 def _map_owners(game_data: pd.DataFrame, draft: pd.DataFrame) -> pd.DataFrame:
@@ -166,7 +164,9 @@ def format_next_game(
     Returns:
         HTML for next game table
     """
-    logger.info("Formatting next game table.")
+
+    logger.debug("Formatting next game table.")
+
     formatted_next_game = next_game_raw.copy()
     formatted_next_game = _map_owners(formatted_next_game, draft)
 
@@ -181,11 +181,9 @@ def format_next_game(
     ]:
         formatted_next_game = _format_live_game(formatted_next_game)
 
-    formatted_next_game = pd.DataFrame.to_html(formatted_next_game, index=False)
+    next_game_html = pd.DataFrame.to_html(formatted_next_game, index=False)
 
-    logger.info("Formatting completed, returning HTML.")
-
-    return formatted_next_game
+    return next_game_html
 
 
 def format_cumulative_points_chart(
@@ -200,7 +198,9 @@ def format_cumulative_points_chart(
     Returns:
         HTML for cumulative points chart
     """
-    logger.info("Formatting cumulative points chart.")
+
+    logger.debug("Formatting cumulative points chart.")
+
     cumulative_owner_stats = cumulative_owner_stats_raw.copy()
     cumulative_points_chart = px.line(
         cumulative_owner_stats,
@@ -219,8 +219,6 @@ def format_cumulative_points_chart(
         full_html=False, include_plotlyjs="cdn"
     )
 
-    logger.info("Formatting completed, returning HTML")
-
     return cumulative_points_chart
 
 
@@ -234,7 +232,7 @@ def format_team_stats(raw_team_stats: pd.DataFrame) -> dict[str, str]:
     Returns:
         Dict of owners with values being HTML of the stats tables of the teams they own
     """
-    logger.info("Formatting team stats per owner.")
+    logger.debug("Formatting team stats per owner.")
 
     all_team_stats = raw_team_stats.copy()
 
@@ -253,27 +251,4 @@ def format_team_stats(raw_team_stats: pd.DataFrame) -> dict[str, str]:
     for owner in team_stats:
         team_stats[owner] = pd.DataFrame.to_html(team_stats[owner], index=False)
 
-    logger.info("Finished formatting team stats per owner")
-
     return team_stats
-
-
-if __name__ == "__main__":
-    import json
-    from lord_stanley.pipeline.transform import pandas
-
-    draft = pd.read_csv("reference_data/drafts/20252026.csv")
-
-    with open("tests/data/future_game.json", "r") as file:
-        future_game_raw = json.load(file)
-    future_game_data = pandas.transform_game_data(future_game_raw)
-
-    future_game, is_live_future = format_next_game(future_game_data, "FUT", draft)
-    print(future_game, is_live_future)
-
-    with open("tests/data/live_game.json", "r") as file:
-        live_game_raw = json.load(file)
-
-    live_game_data = pandas.transform_game_data(live_game_raw)
-    game_data_live, is_live_live = format_next_game(live_game_data, "LIVE", draft)
-    print(game_data_live, is_live_live)

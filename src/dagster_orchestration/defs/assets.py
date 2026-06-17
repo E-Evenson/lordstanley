@@ -10,7 +10,7 @@ from lord_stanley.config import CURRENT_SEASON, CUP_HOLDER_START
 
 from lord_stanley.pipeline.extract import extract_season_schedule
 from lord_stanley.pipeline.load import load_to_bigquery
-from lord_stanley.pipeline.transform.dbt import run_stg_schedule
+from lord_stanley.pipeline.transform.dbt_transform import run_stg_schedule
 
 from lord_stanley.storage.bigquery import query, load_df
 

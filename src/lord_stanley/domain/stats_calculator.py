@@ -13,6 +13,9 @@ import logging
 import pandas as pd
 
 
+logger = logging.getLogger(__name__)
+
+
 def calculate_league_standings(
     completed_cup_games_with_owners: pd.DataFrame, draft: pd.DataFrame
 ) -> pd.DataFrame:
@@ -27,6 +30,7 @@ def calculate_league_standings(
         League standings dataframe with stats
     """
 
+    logger.debug("Calculating league standings.")
     win_counts = completed_cup_games_with_owners["winner_owner"].value_counts()
     games_played = win_counts.add(
         completed_cup_games_with_owners["loser_owner"].value_counts(), fill_value=0
@@ -76,6 +80,8 @@ def calculate_team_stats(
         Dataframe with team stats, including owner, and team rankings for each owner
     """
 
+    logger.debug("Calculating team stats")
+
     win_counts = completed_cup_games_with_owners["winner_abbrev"].value_counts()
     games_played = win_counts.add(
         completed_cup_games_with_owners["loser_abbrev"].value_counts(), fill_value=0
@@ -119,6 +125,8 @@ def calculate_cumulative_owner_stats(
     Returns:
         Dataframe of cumulative stats for each owner over the course of the season
     """
+
+    logger.debug("Calculating cumulative owner stats")
 
     owners_cumulative_stats = completed_cup_games_with_owners.copy()
 

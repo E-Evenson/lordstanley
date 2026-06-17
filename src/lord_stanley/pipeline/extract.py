@@ -10,12 +10,16 @@ Not responsible for:
 """
 
 import json
+import logging
 from typing import Any
 
 import asyncio
 
 from lord_stanley.config import RAW_DIR
 from nhl_api.api import fetch_team_schedules, fetch_game_data
+
+
+logger = logging.getLogger(__name__)
 
 
 def _save_raw(schedule: list[dict[str, Any]], season: str) -> None:
@@ -28,6 +32,8 @@ def _save_raw(schedule: list[dict[str, Any]], season: str) -> None:
     """
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     filepath = RAW_DIR / f"schedule_{season}.json"
+
+    logger.debug(f"Writing raw data to {filepath}")
     with open(filepath, "w") as f:
         json.dump(schedule, f)
 
@@ -44,9 +50,14 @@ def extract_season_schedule(season: str, teams: list[str]) -> list[dict[str, Any
     Returns:
         A list of dicts, where each dict is a team's season schedule data
     """
+    logger.info(f"Extracting season schedule for {len(teams)} teams")
 
     full_season_schedule = asyncio.run(fetch_team_schedules(season, teams))
     _save_raw(full_season_schedule, season)
+
+    logger.info(
+        f"Schedule extraction completed, {len(full_season_schedule)} team schedules retrieved"
+    )
 
     return full_season_schedule
 
@@ -62,19 +73,7 @@ def extract_single_game(game_id: str) -> dict[str, Any]:
     Returns:
         A dict of the data for game_id
     """
-
+    logger.debug(f"Extracting game data for game_id: {game_id}")
     game_data = fetch_game_data(game_id)
 
     return game_data
-
-
-if __name__ == "__main__":
-    # import json
-
-    # game_id = "2025021209"
-    # raw_game = fetch_game_data(game_id)
-
-    # with open(f"tests/data/game/{game_id}.json", "w") as f:
-    #     json.dump(raw_game, f)
-    schedules = extract_season_schedule("20242025", ["CGY"])
-    print(schedules)
