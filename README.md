@@ -61,6 +61,8 @@ Data flow: `nhl_api` -> `BigQuery raw` -> `BigQuery staging` -> `Python (cup pos
 
 **Dual path pipeline.** The live and scheduled implementations are intentionally kept separate. The local version allows for quick live updates, the BigQuery/dbt version is designed for daily refreshes where initial processing latency doesn't matter. 
 
+**Centralized logging configuration.** The logging settings are set in a centralized logging configuration module, applied once at each entry point. Includes a custom UTC ISO timestamp formatter for consistency.
+
 ---
 
 ## The Rebuild
@@ -125,7 +127,6 @@ poetry run flask --app src/lord_stanley/web/app.py run
 
 ## What's Next
 
-- **Logging and error handling** - structured logging throughout the pipeline and domain layers, with graceful handling of NHL API failures
 - **Tests**
     - Live updating: Live updating tests are very early stages. Some fixture data exists. Pipeline transform has partial coverage. Domain logic is untested.
     - Scheduled refresh: Testing for the dbt portion of the scheduled refresh pipeline is done. Still need tests for cup possession logic in Python.
