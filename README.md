@@ -128,8 +128,8 @@ poetry run flask --app src/lord_stanley/web/app.py run
 ## What's Next
 
 - **Tests**
-    - Live updating: Live updating tests are very early stages. Some fixture data exists. Pipeline transform has partial coverage. Domain logic is untested.
-    - Scheduled refresh: Testing for the dbt portion of the scheduled refresh pipeline is done. Still need tests for cup possession logic in Python.
+    - Live updating: Pipeline transform has
+      partial coverage (two cases skipped until future/live game data can be captured next season). Owner assignment and stats calculations remain untested.
 - **Documentation** - module-level docstrings are complete; inline comments for non-obvious logic remain
 - **Dockerizing** - For deployment simplicity and for the learning experience
 - **DuckDB Option** - Under consideration as an alternative to BigQuery for a scheduled refresh deployment option
