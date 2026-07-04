@@ -18,13 +18,22 @@ def test_transform_season_schedule_empty_input_raises_value_error():
         transform_season_schedule([])
 
 
+@pytest.mark.skip(
+    reason="Fixture is an end-of-season snapshot with no FUT games. "
+    "Recapture once the 2026-27 schedule is published."
+)
 def test_winner_loser_null_for_future_game(raw_schedule):
     result = transform_season_schedule(raw_schedule)
     future_games = result[result["game_state"] == "FUT"]
+    assert len(future_games) > 0, "No future games in fixture — test is inconclusive"
     assert future_games["winner_abbrev"].isna().all()
     assert future_games["loser_abbrev"].isna().all()
 
 
+@pytest.mark.skip(
+    reason="Fixture is an end-of-season snapshot with no LIVE games. "
+    "Recapture during a live game next season."
+)
 def test_winner_loser_null_for_live_game(raw_schedule):
     result = transform_season_schedule(raw_schedule)
     live_games = result[result["game_state"] == "LIVE"]
