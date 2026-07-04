@@ -36,17 +36,16 @@ from lord_stanley.storage.bigquery import query
 logger = logging.getLogger(__name__)
 
 
-def _get_next_game_data(cup_schedule: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+def _get_next_game_data(next_cup_game: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     """
-    Find next cup game and run game ETL for it
+    Run game ETL for next cup game
 
     Args:
-        cup_schedule: schedule of cup games
+        next_cup_game: single row DataFrame of the next cup game
 
     Returns:
         Next game data and next game state
     """
-    next_cup_game = cup_schedule.tail(1)
     next_cup_game_id = next_cup_game["id"].item()
     raw_next_game_data = pipeline.run_local_game_etl(next_cup_game_id)
     next_game_state = raw_next_game_data["game_state"].item()
@@ -90,12 +89,20 @@ def run_live_league_calculations() -> LeagueCalculationsResult:
     draft_path = REFERENCE_DATA_DIR / f"drafts/{CURRENT_SEASON}.csv"
     draft = pd.read_csv(draft_path)
 
-    next_game, next_game_state = _get_next_game_data(cup_schedule)
+    next_cup_game = cup_schedule.tail(1)
 
-    if next_game_state in COMPLETED_GAME_STATES:
-        schedule = pipeline.run_local_schedule_etl(CURRENT_SEASON, ACTIVE_TEAM_TRICODES)
-        cup_schedule = cup_possession.get_cup_games(schedule, CUP_HOLDER_START)
-        next_game, next_game_state = _get_next_game_data(cup_schedule)
+    if pd.notna(next_cup_game["winner_abbrev"].item()):
+        # Season is complete per stored data. No new game to fetch or schedule to refresh
+        next_game, next_game_state = next_cup_game, next_cup_game["game_state"].item()
+    else:
+        next_game, next_game_state = _get_next_game_data(next_cup_game)
+
+        if next_game_state in COMPLETED_GAME_STATES:
+            schedule = pipeline.run_local_schedule_etl(
+                CURRENT_SEASON, ACTIVE_TEAM_TRICODES
+            )
+            cup_schedule = cup_possession.get_cup_games(schedule, CUP_HOLDER_START)
+            next_game, next_game_state = _get_next_game_data(cup_schedule.tail(1))
 
     owners_assigned = assign_owners.assign_owners(cup_schedule, draft)
     completed_cup_games_with_owners = owners_assigned[
