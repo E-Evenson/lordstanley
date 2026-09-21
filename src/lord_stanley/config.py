@@ -16,8 +16,8 @@ PROCESSED_DIR = DATA_DIR / "processed"
 REFERENCE_DATA_DIR = ROOT_DIR / "reference_data"
 
 # Season
-CURRENT_SEASON = "20252026"
-CUP_HOLDER_START = "FLA"
+CURRENT_SEASON = "20262027"
+CUP_HOLDER_START = "CAR"
 
 # Pipeline run method switch "live" or "scheduled"
 PIPELINE_RUN_METHOD = os.getenv("PIPELINE_RUN_METHOD", "live")
