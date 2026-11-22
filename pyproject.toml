@@ -20,7 +20,9 @@ dependencies = [
     "dbt-bigquery (>=1.11.1,<2.0.0)",
     "dagster (>=1.13.0,<2.0.0)",
     "dagster-webserver (>=1.13.0,<2.0.0)",
-    "google-cloud-bigquery-storage (>=2.37.0,<3.0.0)"
+    "google-cloud-bigquery-storage (>=2.37.0,<3.0.0)",
+    "tzdata (>=2026.6,<2027.0)",
+    "pytz (>=2026.6,<2027.0)"
 ]
 
 [tool.poetry]
