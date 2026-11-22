@@ -36,6 +36,12 @@ from lord_stanley.storage.bigquery import query
 logger = logging.getLogger(__name__)
 
 
+class LeagueNotFoundError(Exception):
+    """
+    Raised when no draft data exists for the requested league_id
+    """
+
+
 def _get_next_game_data(next_cup_game: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     """
     Run game ETL for next cup game
@@ -78,6 +84,15 @@ def run_live_league_calculations(league_id: str) -> LeagueCalculationsResult:
     """
     logger.info("Running league calculations.")
 
+    draft_path = REFERENCE_DATA_DIR / f"drafts/{CURRENT_SEASON}.csv"
+    draft = pd.read_csv(draft_path)
+
+    draft = draft[draft["league_id"] == league_id]
+    if draft.empty:
+        raise LeagueNotFoundError(
+            f"No draft data for league '{league_id} in {CURRENT_SEASON}"
+        )
+
     logger.debug(f"Checking schedule data for {CURRENT_SEASON}")
     schedule_path = PROCESSED_DIR / f"{CURRENT_SEASON}_schedule.parquet"
     if not schedule_path.exists():
@@ -88,13 +103,6 @@ def run_live_league_calculations(league_id: str) -> LeagueCalculationsResult:
         schedule = pd.read_parquet(schedule_path)
 
     cup_schedule = cup_possession.get_cup_games(schedule, CUP_HOLDER_START)
-
-    draft_path = REFERENCE_DATA_DIR / f"drafts/{CURRENT_SEASON}.csv"
-    draft = pd.read_csv(draft_path)
-
-    draft = draft[draft["league_id"] == league_id]
-    if draft.empty:
-        raise ValueError(f"No draft data for league '{league_id} in {CURRENT_SEASON}")
 
     next_cup_game = cup_schedule.tail(1)
 
@@ -152,6 +160,15 @@ def run_league_calculations_sql(league_id: str) -> LeagueCalculationsResult:
     """
     logger.info("Fetching league data from SQL data marts")
 
+    draft_path = REFERENCE_DATA_DIR / f"drafts/{CURRENT_SEASON}.csv"
+    draft = pd.read_csv(draft_path)
+
+    draft = draft[draft["league_id"] == league_id]
+    if draft.empty:
+        raise LeagueNotFoundError(
+            f"No draft data for league '{league_id} in {CURRENT_SEASON}"
+        )
+
     league_standings_query = (
         files("lord_stanley.domain.sql").joinpath("league_standings.sql").read_text()
     )
@@ -176,13 +193,6 @@ def run_league_calculations_sql(league_id: str) -> LeagueCalculationsResult:
     next_game_query = next_game_query.format(season=CURRENT_SEASON)
     next_game = query(next_game_query)
     next_game_state = next_game["game_state"].iloc[0]
-
-    draft_path = REFERENCE_DATA_DIR / f"drafts/{CURRENT_SEASON}.csv"
-    draft = pd.read_csv(draft_path)
-
-    draft = draft[draft["league_id"] == league_id]
-    if draft.empty:
-        raise ValueError(f"No draft data for league '{league_id} in {CURRENT_SEASON}")
 
     display_data: LeagueCalculationsResult = {
         "league_standings": league_standings,
