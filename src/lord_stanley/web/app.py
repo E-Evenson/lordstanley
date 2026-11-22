@@ -2,14 +2,14 @@
 Lord Stanley webapp
 
 Responsibilities:
-    - Calling domain layer
+    - Calling domain layer and passing league_id
     - Passing raw data to formatter layer
     - Next game display formatting
 """
 
 import logging
 
-from flask import Flask, render_template
+from flask import Flask, abort, redirect, render_template, url_for
 
 from lord_stanley.config import PIPELINE_RUN_METHOD
 from lord_stanley.domain import orchestrate as domain_orchestrator
@@ -23,15 +23,36 @@ app = Flask(__name__)
 
 
 @app.route("/")
-def index():
+def home():
+    """
+    Redirect the bare root URL to the default league page
+    """
+    return redirect(url_for("index", league_id="lord-stanley"))
+
+
+@app.route("/<league_id>/")
+def index(league_id: str):
     """
     Render the Lord Stanley league standings and next cup game page.
+
+    Args:
+        league_id: id of the league to display, taken from the url
     """
-    logger.info(f"Pipeline run method: {PIPELINE_RUN_METHOD}")
-    if PIPELINE_RUN_METHOD == "scheduled":
-        display_data = domain_orchestrator.run_league_calculations_sql()
-    else:
-        display_data = domain_orchestrator.run_live_league_calculations()
+    logger.info(
+        f"Rendering league {league_id}. Pipeline run method: {PIPELINE_RUN_METHOD}"
+    )
+
+    try:
+        if PIPELINE_RUN_METHOD == "scheduled":
+            display_data = domain_orchestrator.run_league_calculations_sql(
+                league_id=league_id
+            )
+        else:
+            display_data = domain_orchestrator.run_live_league_calculations(
+                league_id=league_id
+            )
+    except domain_orchestrator.LeagueNotFoundError:
+        abort(404)
 
     raw_league_standings = display_data["league_standings"]
     league_standings_html = formatters.format_league_standings(raw_league_standings)
@@ -62,6 +83,7 @@ def index():
 
     return render_template(
         "index.html",
+        league_id=league_id,
         standings_table=league_standings_html,
         next_game_table=next_game_html,
         is_live=is_live,
