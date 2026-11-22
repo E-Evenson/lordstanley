@@ -66,9 +66,12 @@ class LeagueCalculationsResult(TypedDict):
     draft: pd.DataFrame
 
 
-def run_live_league_calculations() -> LeagueCalculationsResult:
+def run_live_league_calculations(league_id: str) -> LeagueCalculationsResult:
     """
     Orchestrate all domain logic and calculations for Lord Stanley
+
+    Args:
+        league_id: id of the league to calculate stats for
 
     Returns:
         Typed dict containing league calculations
@@ -88,6 +91,10 @@ def run_live_league_calculations() -> LeagueCalculationsResult:
 
     draft_path = REFERENCE_DATA_DIR / f"drafts/{CURRENT_SEASON}.csv"
     draft = pd.read_csv(draft_path)
+
+    draft = draft[draft["league_id"] == league_id]
+    if draft.empty:
+        raise ValueError(f"No draft data for league '{league_id} in {CURRENT_SEASON}")
 
     next_cup_game = cup_schedule.tail(1)
 
@@ -133,9 +140,12 @@ def run_live_league_calculations() -> LeagueCalculationsResult:
     return display_data
 
 
-def run_league_calculations_sql() -> LeagueCalculationsResult:
+def run_league_calculations_sql(league_id: str) -> LeagueCalculationsResult:
     """
     Run SQL queries on data marts
+
+    Args
+        league_id: id of the league to calculate stats for
 
     Returns:
         Typed dict containing league calculations
@@ -169,6 +179,10 @@ def run_league_calculations_sql() -> LeagueCalculationsResult:
 
     draft_path = REFERENCE_DATA_DIR / f"drafts/{CURRENT_SEASON}.csv"
     draft = pd.read_csv(draft_path)
+
+    draft = draft[draft["league_id"] == league_id]
+    if draft.empty:
+        raise ValueError(f"No draft data for league '{league_id} in {CURRENT_SEASON}")
 
     display_data: LeagueCalculationsResult = {
         "league_standings": league_standings,
