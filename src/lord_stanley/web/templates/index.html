@@ -2,11 +2,11 @@
 <html>
 
 <head>
-    <title>Lord Stanley</title>
+    <title>{{league_id}} | Lord Stanley</title>
 </head>
 
 <body>
-    <h1>Standings</h1>
+    <h1>{{league_id}} Standings</h1>
     {{ standings_table | safe }}
 
     <h1>Next Game{% if is_live %} (LIVE){% endif %}</h1>
